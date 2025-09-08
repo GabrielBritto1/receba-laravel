@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+   /**
+    * Run the migrations.
+    */
+   public function up(): void
+   {
+      Schema::create('cestas', function (Blueprint $table) {
+         $table->id();
+         $table->date('data_entrega');
+         $table->string('quantidade_total');
+         $table->string('status')->default('Em Análise');
+         $table->string('ponto_origem')->default('IFES');
+         $table->foreignId('parceiro_id')->constrained('parceiros')->onDelete('cascade');
+         $table->timestamps();
+      });
+   }
+
+   /**
+    * Reverse the migrations.
+    */
+   public function down(): void
+   {
+      Schema::dropIfExists('cestas');
+   }
+};
