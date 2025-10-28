@@ -20,11 +20,15 @@ class Representante extends Model
       'nome_conjuge',
       'data_nascimento_conjuge',
       'rg',
-      'familia_id',
    ];
 
-   public function familia()
+   protected $casts = [
+      'data_nascimento' => 'datetime',
+      'data_nascimento_conjuge' => 'datetime',
+   ];
+
+   public function familias()
    {
-      return $this->belongsTo(Familia::class);
+      return $this->hasMany(Familia::class);
    }
 }

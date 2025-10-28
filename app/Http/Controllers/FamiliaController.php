@@ -6,6 +6,7 @@ use App\Http\Requests\StoreFamiliaRequest;
 use App\Models\Endereco;
 use App\Models\Familia;
 use App\Models\Pessoa;
+use App\Models\Representante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,17 @@ class FamiliaController extends Controller
     */
    public function index()
    {
-      $familias = Familia::all();
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+      if ($user->can('is-admin')) {
+         $familias = Familia::all();
+      } else {
+         $familias = collect();
+         if ($parceiro) {
+            $cestasPorParceiro = Familia::where('parceiro_id', $parceiro->id)->get();
+            $familias = $parceiro->familias;
+         }
+      }
       return view('familias.index', compact('familias'));
    }
 
@@ -48,8 +59,24 @@ class FamiliaController extends Controller
          }
          $parceiroId = $parceiros->first()->id;
 
-         // 1. Cria a Família (Aqui usamos '??' para campos que podem não vir)
-         $familia = Familia::create([
+         // 1. Cria o Representante (Aqui usamos '??' para campos que podem não vir)
+         $representante = Representante::create([
+            'nome' => $validatedData['name'],
+            'cpf' => $validatedData['cpf'],
+            'rg' => $validatedData['rg'] ?? null,
+            'data_nascimento' => $validatedData['dt_nascimento'],
+            'uf' => $validatedData['uf'],
+            'estado_civil' => $validatedData['estado_civil'],
+            'telefone' => $validatedData['telefone'],
+            'escolaridade' => $validatedData['nivel_escolaridade'],
+            'filiacao' => $validatedData['filiacao'],
+            'nome_conjuge' => $validatedData['name_conjuge'] ?? null,
+            'cpf_conjuge' => $validatedData['cpf_conjuge'] ?? null,
+            'data_nascimento_conjuge' => $validatedData['dt_nascimento_conjuge'] ?? null,
+         ]);
+
+         // 2. Cria a Família (aqui os campos são obrigatórios, então não precisa de '??')
+         $familia = $representante->familias()->create([
             'parceiro_id' => $parceiroId,
             'numero_casa' => $validatedData['numero_casa'],
             'bairro' => $validatedData['bairro'],
@@ -63,22 +90,6 @@ class FamiliaController extends Controller
             'medicamento' => $validatedData['qual_medicacao'] ?? null,
             'descricao' => $validatedData['observacao'] ?? null,
             'status' => true,
-         ]);
-
-         // 2. Cria o Representante (aqui os campos são obrigatórios, então não precisa de '??')
-         $familia->representante()->create([
-            'nome' => $validatedData['name'],
-            'cpf' => $validatedData['cpf'],
-            'rg' => $validatedData['rg'] ?? null,
-            'data_nascimento' => $validatedData['dt_nascimento'],
-            'uf' => $validatedData['uf'],
-            'estado_civil' => $validatedData['estado_civil'],
-            'telefone' => $validatedData['telefone'],
-            'escolaridade' => $validatedData['nivel_escolaridade'],
-            'filiacao' => $validatedData['filiacao'],
-            'nome_conjuge' => $validatedData['name_conjuge'] ?? null,
-            'cpf_conjuge' => $validatedData['cpf_conjuge'] ?? null,
-            'data_nascimento_conjuge' => $validatedData['dt_nascimento_conjuge'] ?? null,
          ]);
 
          // ====================================================================
@@ -123,7 +134,8 @@ class FamiliaController extends Controller
     */
    public function show(string $id)
    {
-      //
+      $familia = Familia::with('representante', 'membroFamilia', 'rendaFamilia')->findOrFail($id);
+      return view('familias.show', compact('familia'));
    }
 
    /**
@@ -148,5 +160,130 @@ class FamiliaController extends Controller
    public function destroy(string $id)
    {
       //
+   }
+
+   public function getCestas(Familia $familia)
+   {
+      $cestas = $familia->cestas()
+         ->with('parceiro')
+         ->latest('data_entrega')
+         ->get();
+
+      return response()->json($cestas);
+   }
+
+   public function importacaoCpf(Familia $familia)
+   {
+      $familia->load('representante');
+
+      return view('familias.importacao_cpf', compact('familia'));
+   }
+
+   public function checkCpf(Request $request)
+   {
+      $cpf = $request->input('cpf');
+      $cpfLimpo = preg_replace('/[^0-9]/', '', $cpf);
+
+      // 1. Encontra o representante e já carrega a COLEÇÃO de suas famílias
+      $representante = Representante::with('familias')->where('cpf', $cpfLimpo)->first();
+
+      // 2. Verifica se o representante existe e se a COLEÇÃO de famílias não está vazia
+      if ($representante && $representante->familias->isNotEmpty()) {
+
+         $parceiroAtual = Auth::user()->parceiros->first();
+
+         // 3. Procura na COLEÇÃO se alguma família já pertence ao parceiro atual
+         $familiaNesteParceiro = $representante->familias->where('parceiro_id', $parceiroAtual->id)->first();
+
+         if ($familiaNesteParceiro) {
+            // ENCONTROU! O CPF já está associado a uma família neste parceiro.
+            return response()->json([
+               'exists' => true,
+               'status' => 'already_associated'
+            ]);
+         } else {
+            // Não encontrou neste parceiro, mas o CPF existe em outro. Pode importar.
+            return response()->json([
+               'exists' => true,
+               'status' => 'can_import',
+               // Pega o ID da primeira família encontrada para usar como base na página de importação
+               'familia_id' => $representante->familias->first()->id
+            ]);
+         }
+      }
+
+      // Se o representante não foi encontrado ou não tem nenhuma família, retorna que não existe
+      return response()->json(['exists' => false]);
+   }
+
+   public function importStore(Request $request)
+   {
+      $validated = $request->validate([
+         'representante_id' => 'required|exists:representantes,id',
+      ]);
+
+      $parceiroAtual = Auth::user()->parceiros->first();
+
+      if (!$parceiroAtual) {
+         return redirect()->route('familias.index')->with('error', 'Seu usuário não está vinculado a um parceiro.');
+      }
+
+      $familiaJaExiste = Familia::where('representante_id', $validated['representante_id'])
+         ->where('parceiro_id', $parceiroAtual->id)
+         ->exists();
+
+      if ($familiaJaExiste) {
+         return redirect()->route('familias.index')->with('info', 'Esta família já está cadastrada para o seu parceiro.');
+      }
+
+      DB::beginTransaction();
+      try {
+         $representante = Representante::find($validated['representante_id']);
+
+         // ===== CORREÇÃO PRINCIPAL AQUI =====
+         // Usamos o relacionamento no plural 'familias' e pegamos o primeiro registro como modelo.
+         $familiaOriginal = $representante->familias->first();
+
+         // Verificação de segurança para garantir que a família original foi encontrada
+         if (!$familiaOriginal) {
+            throw new \Exception('A família original do representante não foi encontrada para a cópia.');
+         }
+         // ===== FIM DA CORREÇÃO =====
+
+         $novaFamilia = Familia::create([
+            'representante_id' => $representante->id,
+            'parceiro_id' => $parceiroAtual->id,
+            'endereco' => $familiaOriginal->endereco,
+            'numero_casa' => $familiaOriginal->numero_casa,
+            'bairro' => $familiaOriginal->bairro,
+            'cidade' => $familiaOriginal->cidade,
+            'reside' => $familiaOriginal->reside,
+            'aluguel' => $familiaOriginal->aluguel,
+            'descricao' => $familiaOriginal->descricao,
+            'status' => true,
+            'cad_unico' => $familiaOriginal->cad_unico,
+            'doenca' => $familiaOriginal->doenca,
+            'medicamento' => $familiaOriginal->medicamento,
+            'nis' => $familiaOriginal->nis,
+         ]);
+
+         if ($familiaOriginal->membroFamilia) {
+            $novaFamilia->membroFamilia()->create($familiaOriginal->membroFamilia->getAttributes());
+         }
+         if ($familiaOriginal->rendaFamilia) {
+            $novaFamilia->rendaFamilia()->create($familiaOriginal->rendaFamilia->getAttributes());
+         }
+
+         DB::commit();
+      } catch (\Exception $e) {
+         DB::rollBack();
+
+         // ADICIONE ESTE DD PARA VER QUALQUER ERRO QUE ACONTEÇA AQUI DENTRO
+         dd($e);
+
+         return redirect()->back()->with('error', 'Ocorreu um erro ao importar os dados da família.');
+      }
+
+      return redirect()->route('familias.index')->with('success', 'Família associada ao seu parceiro com sucesso!');
    }
 }

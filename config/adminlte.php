@@ -305,13 +305,13 @@ return [
          'icon' => 'fas fa-home',
       ],
       [
-         'text' => 'CADASTRAR PARCEIROS',
+         'text' => 'GERENCIAR PARCEIROS',
          'url'  => 'parceiros',
          'icon' => 'fas fa-address-card',
          'can' => 'is-admin',
       ],
       [
-         'text' => 'CADASTRAR SECRETÁRIOS',
+         'text' => 'SEU PARCEIRO',
          'url'  => 'parceiros',
          'icon' => 'fas fa-address-card',
          'can' => 'coordenador',
@@ -323,7 +323,7 @@ return [
       ],
       [
          'text' => 'SOLICITAR CESTAS',
-         'url'  => 'cestas',
+         'url'  => 'solicitacoes',
          'icon' => 'fas fa-shopping-basket',
       ],
       [
@@ -333,21 +333,22 @@ return [
       ],
       [
          'text' => 'REGISTRAR ENTREGA',
-         'url'  => 'entregas',
+         'url'  => 'cestas',
          'icon' => 'fas fa-calendar-plus',
       ],
       [
          'text' => 'GERENCIAMENTO',
          'icon' => '	fas fa-folder-open',
+         'can' => 'is-admin',
          'submenu' => [
             [
                'text' => 'GERENCIAR CESTAS',
-               'url'  => 'entregas/gerenciar_cestas',
+               'url'  => 'solicitacoes/gerenciar_solicitacoes',
                'icon' => 'fas fa-circle',
             ],
             [
                'text' => 'GERENCIAR ITENS',
-               'url'  => 'entregas/gerenciar_itens',
+               'url'  => 'solicitacoes/gerenciar_itens',
                'icon' => 'fas fa-circle',
             ],
          ]
@@ -431,17 +432,17 @@ return [
          ],
       ],
       'Select2' => [
-         'active' => false,
+         'active' => true,
          'files' => [
             [
                'type' => 'js',
-               'asset' => false,
-               'location' => '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
+               'asset' => true,
+               'location' => '//cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
             ],
             [
                'type' => 'css',
-               'asset' => false,
-               'location' => '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css',
+               'asset' => true,
+               'location' => '//cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
             ],
          ],
       ],

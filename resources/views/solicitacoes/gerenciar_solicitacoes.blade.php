@@ -24,41 +24,33 @@
                      </tr>
                   </thead>
                   <tbody>
-                     @forelse($cestaEmAnalise as $cesta)
+                     @forelse($solicitacaoEmAnalise as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
-                        <td class="align-middle">{{ $cesta->created_at->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->data_entrega->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->quantidade_total }}</td>
+                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_solicitada }}</td>
                         <td class="align-middle">
-                           <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">{{ $cesta->status }}</span>
+                           <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">{{ $solicitacao->status }}</span>
                         </td>
-                        <td class="align-middle">
-                           <a href="{{ route('entregas.alterar_status_cesta', ['cesta' => $cesta->id, 'status' => 'Aceita']) }}" class="btn btn-warning btn-sm text-bold text-white float-right">
-                              <i class="fas fa-check"></i> Aprovar
-                           </a>
-                        </td>
+                        <form action="{{ route('solicitacoes.alterar_status_solicitacao', $solicitacao) }}" method="POST" class="d-flex">
+                           <td class="align-middle d-flex justify-content-end">
+                              @csrf
+                              @method('PUT')
+                              <input type="hidden" name="status" value="Aceita">
+                              <input type="datetime-local" hidden name="data_aceito" value="{{ now()->format('Y-m-d\TH:i') }}">
+                              <input type="text" name="quantidade_aceita" required class="form-control form-control-sm text-center text-bold col-1 mr-1">
+                              <button type="submit" class="btn btn-warning btn-sm text-bold text-white">
+                                 <i class="fas fa-check"></i> Aprovar
+                              </button>
+                           </td>
+                        </form>
                      </tr>
                      @empty
                      <tr>
                         <td class="align-middle text-center" colspan="6">Nenhuma solicitação em análise.</td>
                      </tr>
                      @endforelse
-                     <tr>
-                        <td class="align-middle">Parceiro</td>
-                        <td class="align-middle">01/01/2023</td>
-                        <td class="align-middle">01/02/2023</td>
-                        <td class="align-middle">10</td>
-                        <td class="align-middle">
-                           <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">Em Análise</span>
-                        </td>
-                        <td class="align-middle d-flex justify-content-end">
-                           <input type="text" name="qtd_aceita" class="form-control form-control-sm text-center text-bold col-1 mr-1">
-                           <a href="#" class="btn btn-warning btn-sm text-bold text-white">
-                              <i class="fas fa-check"></i> Aprovar
-                           </a>
-                        </td>
-                     </tr>
                   </tbody>
                </table>
             </div>
@@ -87,20 +79,26 @@
                      </tr>
                   </thead>
                   <tbody>
-                     @forelse($cestaAceita as $cesta)
+                     @forelse($solicitacaoAceita as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
-                        <td class="align-middle">{{ $cesta->created_at->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->data_entrega->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->quantidade_total }}</td>
+                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
                         <td class="align-middle">
                            <span class="badge badge-primary text-uppercase">Em Montagem</span>
                         </td>
-                        <td class="align-middle">
-                           <a href="{{ route('entregas.alterar_status_cesta', ['cesta' => $cesta->id, 'status' => 'Montada']) }}" class="btn btn-warning btn-sm text-bold text-white float-right">
-                              <i class="fas fa-check"></i> Concluir
-                           </a>
-                        </td>
+                        <form action="{{ route('solicitacoes.alterar_status_solicitacao', $solicitacao) }}" method="POST" class="d-flex">
+                           <td class="align-middle d-flex justify-content-end">
+                              @csrf
+                              @method('PUT')
+                              <input type="hidden" name="status" value="Montada">
+                              <input type="datetime-local" hidden name="data_montada" value="{{ now()->format('Y-m-d\TH:i') }}">
+                              <button type="submit" class="btn btn-warning btn-sm text-bold text-white">
+                                 <i class="fas fa-check"></i> Concluir
+                              </button>
+                           </td>
+                        </form>
                      </tr>
                      @empty
                      <tr>
@@ -135,20 +133,26 @@
                      </tr>
                   </thead>
                   <tbody>
-                     @forelse($cestaMontada as $cesta)
+                     @forelse($solicitacaoMontada as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
-                        <td class="align-middle">{{ $cesta->created_at->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->data_entrega->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->quantidade_total }}</td>
+                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
                         <td class="align-middle">
-                           <span class="badge badge-warning text-uppercase text-white">{{ $cesta->status }}</span>
+                           <span class="badge badge-warning text-uppercase text-white">{{ $solicitacao->status }}</span>
                         </td>
-                        <td class="align-middle">
-                           <a href="{{ route('entregas.alterar_status_cesta', ['cesta' => $cesta->id, 'status' => 'Entregue']) }}" class="btn btn-warning btn-sm text-bold text-white float-right">
-                              <i class="fas fa-check"></i> Entregar
-                           </a>
-                        </td>
+                        <form action="{{ route('solicitacoes.alterar_status_solicitacao', $solicitacao) }}" method="POST" class="d-flex">
+                           <td class="align-middle d-flex justify-content-end">
+                              @csrf
+                              @method('PUT')
+                              <input type="hidden" name="status" value="Entregue">
+                              <input type="datetime-local" hidden name="data_entrega" value="{{ now()->format('Y-m-d\TH:i') }}">
+                              <button type="submit" class="btn btn-warning btn-sm text-bold text-white">
+                                 <i class="fas fa-check"></i> Entregar
+                              </button>
+                           </td>
+                        </form>
                      </tr>
                      @empty
                      <tr>
@@ -182,14 +186,14 @@
                      </tr>
                   </thead>
                   <tbody>
-                     @forelse($cestaEntregue as $cesta)
+                     @forelse($solicitacaoEntregue as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
-                        <td class="align-middle">{{ $cesta->created_at->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->data_entrega->format('d/m/Y') }}</td>
-                        <td class="align-middle">{{ $cesta->quantidade_total }}</td>
+                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
                         <td class="align-middle">
-                           <span class="badge badge-success text-uppercase">{{ $cesta->status }}</span>
+                           <span class="badge badge-success text-uppercase">{{ $solicitacao->status }}</span>
                         </td>
                      </tr>
                      @empty
@@ -218,21 +222,25 @@
                      <tr>
                         <th>Parceiro</th>
                         <th>Data de Reserva</th>
-                        <th>Data previsão das entregas para as familias</th>
                         <th>Quantidade</th>
                         <th>Status das cestas</th>
                      </tr>
                   </thead>
                   <tbody>
+                     @forelse($solicitacaoNaoAceita as $solicitacao)
                      <tr>
-                        <td class="align-middle">Parceiro</td>
-                        <td class="align-middle">01/01/2023</td>
-                        <td class="align-middle">01/02/2023</td>
-                        <td class="align-middle">10</td>
+                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_nao_aceita }}</td>
                         <td class="align-middle">
                            <span class="badge badge-danger text-uppercase">Não Aceita</span>
                         </td>
                      </tr>
+                     @empty
+                     <tr>
+                        <td class="align-middle text-center" colspan="6">Nenhuma solicitação nzo aceita.</td>
+                     </tr>
+                     @endforelse
                   </tbody>
                </table>
             </div>
@@ -241,3 +249,15 @@
    </div>
 </section>
 @stop
+
+@section('js')
+@if (session('success'))
+<script>
+   Swal.fire({
+      icon: 'success',
+      title: 'Sucesso',
+      text: "{{ session('success') }}",
+   });
+</script>
+@endif
+@endsection

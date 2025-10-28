@@ -8,7 +8,7 @@ use App\Models\Parceiro;
 use App\Models\ParceiroSigla;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class ParceiroController extends Controller
 {
@@ -17,7 +17,13 @@ class ParceiroController extends Controller
     */
    public function index()
    {
-      $parceiros = Parceiro::all();
+      $user = Auth::user();
+      if ($user->can('is-admin')) {
+         $parceiros = Parceiro::all();
+      } else {
+         $parceiros = $user->parceiros->first();
+         $parceiros = $parceiros ? [$parceiros] : [];
+      }
       $coordenadores = User::whereHas('roles', function ($query) {
          $query->where('name', 'coordenador');
       })->get();
@@ -90,7 +96,16 @@ class ParceiroController extends Controller
     */
    public function update(Request $request, string $id)
    {
-      //
+      $parceiro = Parceiro::findOrFail($id);
+      $validated = $request->validate([
+         'name' => 'required|string|max:255',
+         'endereco' => 'required|string|max:255',
+         'telefone' => 'required|string|max:15',
+         'cep' => 'required|string|max:10',
+         'cnpj' => 'nullable|string|max:18',
+      ]);
+      $parceiro->update($validated);
+      return redirect()->route('parceiros.index')->with('success', 'Parceiro atualizado com sucesso!');
    }
 
 

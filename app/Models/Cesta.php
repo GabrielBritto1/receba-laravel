@@ -7,19 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 class Cesta extends Model
 {
    protected $fillable = [
+      'data_recebimento',
+      'data_em_rota',
       'data_entrega',
-      'quantidade_total',
-      'status',
       'ponto_origem',
+      'status',
       'parceiro_id',
+      'familia_id',
    ];
 
    protected $casts = [
-      'data_entrega' => 'date',
+      'data_recebimento' => 'datetime',
+      'data_em_rota' => 'datetime',
+      'data_entrega' => 'datetime',
    ];
 
    public function parceiro()
    {
       return $this->belongsTo(Parceiro::class);
+   }
+
+   public function familia()
+   {
+      return $this->belongsTo(Familia::class);
    }
 }

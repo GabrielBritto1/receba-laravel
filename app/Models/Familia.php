@@ -20,11 +20,12 @@ class Familia extends Model
       'status',
       'endereco',
       'parceiro_id',
+      'representante_id',
    ];
 
    public function representante()
    {
-      return $this->hasOne(Representante::class);
+      return $this->belongsTo(Representante::class);
    }
 
    public function membroFamilia()
@@ -40,5 +41,10 @@ class Familia extends Model
    public function parceiro()
    {
       return $this->belongsTo(Parceiro::class);
+   }
+
+   public function cestas()
+   {
+      return $this->hasMany(Cesta::class, 'familia_id');
    }
 }

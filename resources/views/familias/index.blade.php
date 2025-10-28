@@ -32,7 +32,7 @@
                   <td class="align-middle">{{ $familia->representante->cpf }}</td>
                   <td class="align-middle">{{ $familia->representante->telefone }}</td>
                   <td class="align-middle">
-                     <span class="badge p-2" style="background-color: {{ $familia->parceiro->sigla->color }}; font-size: 16px; color: #fff;">{{ $familia->parceiro->sigla->name }}</span>
+                     <span class="badge p-2" style="background-color: {{ $familia->parceiro->sigla->color ?? '#28a745' }}; font-size: 16px; color: #fff;">{{ $familia->parceiro->sigla->name ?? $familia->parceiro->name }}</span>
                   </td>
                   <td class="align-middle">
                      @if ($familia->status == 1)
@@ -43,7 +43,7 @@
                   </td>
                   <td>
                      <div class="btn-group float-right">
-                        <a href="#" class="btn btn-success btn-md">
+                        <a href="{{ route('familias.show', $familia->id) }}" class="btn btn-success btn-md">
                            <i class="fas fa-eye"></i>
                         </a>
                         <a href="#" class="btn btn-warning btn-md text-white">
@@ -277,9 +277,102 @@
 @stop
 
 @section('js')
+@if (session('success'))
+<script>
+   Swal.fire({
+      icon: 'success',
+      title: 'Sucesso',
+      text: "{{ session('success') }}",
+   });
+</script>
+@endif
 <script>
    $(document).ready(function() {
+      // Adiciona o token CSRF a todas as requisições AJAX
+      $.ajaxSetup({
+         headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+         }
+      });
 
+      // ==========================================================
+      //  FUNÇÃO REUTILIZÁVEL PARA VERIFICAR CPF
+      // ==========================================================
+      function verificarCpf(cpf, isConjuge = false) {
+         if (!cpf) return;
+
+         $.ajax({
+            url: "{{ route('familias.checkCpf') }}",
+            type: 'POST',
+            data: {
+               cpf: cpf
+            },
+            success: function(response) {
+               if (response.exists) {
+
+                  // CASO 1: CPF já associado ao parceiro atual
+                  if (response.status === 'already_associated') {
+                     Swal.fire({
+                        icon: 'error',
+                        title: 'Família já Cadastrada!',
+                        text: 'Este CPF já pertence a uma família que está associada ao seu parceiro.',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#28a745',
+                        allowOutsideClick: false,
+                     });
+                     // Limpa o campo para evitar envio do formulário com dados duplicados
+                     if (isConjuge) {
+                        $('#cpf_conjuge').val('');
+                     } else {
+                        $('#cpf').val('');
+                     }
+
+                     // CASO 2: CPF existe, mas em outro parceiro (pode importar)
+                  } else if (response.status === 'can_import' && !isConjuge) {
+                     Swal.fire({
+                        icon: 'info',
+                        title: 'CPF já cadastrado!',
+                        text: 'Este CPF já é representante de uma família em outro parceiro. Redirecionando para a página de associação.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#28a745',
+                        allowOutsideClick: false,
+                     }).then((result) => {
+                        if (result.isConfirmed) {
+                           let redirectUrl = "{{ route('familias.importacao_cpf', ['familia' => ':familiaId']) }}";
+                           redirectUrl = redirectUrl.replace(':familiaId', response.familia_id);
+                           window.location.href = redirectUrl;
+                        }
+                     });
+
+                     // CASO 3: CPF do cônjuge já existe (apenas informa)
+                  } else if (response.status === 'can_import' && isConjuge) {
+                     Swal.fire({
+                        icon: 'warning',
+                        title: 'Atenção!',
+                        text: 'O CPF informado para o cônjuge já está cadastrado como representante de outra família.',
+                        confirmButtonText: 'Entendido',
+                     });
+                  }
+               }
+            },
+            error: function() {
+               console.error('Erro ao verificar o CPF.');
+            }
+         });
+      }
+
+      // ==========================================================
+      //  EVENTOS DE 'BLUR' PARA OS CAMPOS DE CPF
+      // ==========================================================
+      // Evento para o CPF do representante
+      $('#cpf').on('blur', function() {
+         verificarCpf($(this).val(), false);
+      });
+
+      // Evento para o CPF do cônjuge
+      $('#cpf_conjuge').on('blur', function() {
+         verificarCpf($(this).val(), true);
+      });
       // Lógica para mostrar/esconder campo de valor do aluguel
       $('#reside').on('change', function() {
          if ($(this).val() === 'Alugada') {

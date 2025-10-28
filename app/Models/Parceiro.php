@@ -34,4 +34,9 @@ class Parceiro extends Model
    {
       return $this->hasMany(Cesta::class);
    }
+
+   public function solicitacoes()
+   {
+      return $this->hasMany(Solicitacao::class);
+   }
 }
