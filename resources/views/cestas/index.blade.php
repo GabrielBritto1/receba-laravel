@@ -1,149 +1,231 @@
 @extends('adminlte::page')
-@section('title', 'Solicitar Cestas - RECeBa')
+@section('title', 'Registrar Entrega - RECeBa')
 @section('content_header')
-<h1 class="text-bold"><i class="fas fa-shopping-basket"></i> Solicitar Cestas</h1>
+<h1 class="text-bold"><i class="fas fa-calendar-plus"></i> Registrar Entrega</h1>
 @stop
 @section('content')
-<div class="card">
-   <div class="card-header">
-      <span class="text-muted text-uppercase">Solicitações</span>
-      <div class="card-tools">
-         @if($parceiro)
-         <a href="#" class="btn btn-success btn-sm text-bold" data-toggle="modal" data-target="#modalCadastrarCesta">
-            <i class="fas fa-plus"></i> Solicitar Cesta ao IFES
-         </a>
-         @else
-         <button class="btn btn-secondary btn-sm text-bold" disabled title="Você não está vinculado a nenhum parceiro">
-            <i class="fas fa-plus"></i> Solicitar Cesta ao IFES
-         </button>
-         @endif
+<section class="cestas_que_nao_sairam">
+   <div class="card">
+      <div class="card-header">
+         <span class="text-muted text-uppercase">Cestas que ainda não sairam</span>
+         <div class="card-tools">
+            <a href="#" class="btn btn-success btn-sm text-bold" data-toggle="modal" data-target="#modalEntregarCesta">
+               <i class="fas fa-plus"></i> Registrar Entrega Própria
+            </a>
+         </div>
       </div>
-   </div>
-   <div class="card-body pt-1">
-      <div class="row">
-         <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
-               <thead>
-                  <tr>
-                     <th>Data da Reserva</th>
-                     <th>Quantidade Total</th>
-                     <th>Quantidade Aceita</th>
-                     <th>Em Posse</th>
-                     <th>Status</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  @forelse($cestas as $cesta)
-                  <tr>
-                     <td class="align-middle">{{ $cesta->created_at->format('d/m/Y') }}</td>
-                     <td class="align-middle">{{ $cesta->quantidade_total }}</td>
-                     <td class="align-middle">{{ $cesta->quantidade_total }}</td>
-                     <td class="align-middle text-bold">{{ $cesta->ponto_origem }}</td>
-                     @if ($cesta->status == 'Em Análise')
-                     <td class="align-middle">
-                        <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">Em Análise</span>
-                     </td>
-                     @elseif ($cesta->status == 'Aceita')
-                     <td class="align-middle">
-                        <span class="badge badge-info text-uppercase">Aceita</span>
-                     </td>
-                     @elseif ($cesta->status == 'Montada')
-                     <td class="align-middle">
-                        <span class="badge badge-warning text-uppercase text-white">Montada</span>
-                     </td>
-                     @elseif ($cesta->status == 'Entregue')
-                     <td class="align-middle">
-                        <span class="badge badge-success text-uppercase">Entregue</span>
-                     </td>
+      <div class="card-body pt-1">
+         <div class="row">
+            <div class="card-body table-responsive p-0">
+               <table class="table table-hover text-nowrap table-striped">
+                  <thead>
+                     <tr>
+                        <th>Parceiro</th>
+                        <th>Data de Recebimento</th>
+                        <th>Status das cestas</th>
+                        <th></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     @forelse($cestasPorParceiro as $cesta)
+                     @if ($cesta->status === 'Não saiu para entrega')
+                     <tr>
+                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
+                        <td class="align-middle">{{ $cesta->data_recebimento->format('d/m/Y') }}</td>
+                        <td class="align-middle">
+                           <span class="badge badge-danger text-uppercase">{{ $cesta->status }}</span>
+                        </td>
+                        <td class="align-middle">
+                           <a href="{{ route('cestas.entrega_familia', $cesta->id) }}" class="btn btn-warning btn-sm text-white">
+                              <i class="fas fa-shipping-fast"></i>
+                           </a>
+                        </td>
+                     </tr>
                      @endif
-                  </tr>
-                  @empty
-                  <tr>
-                     <td colspan="5" class="text-center">Nenhuma solicitação encontrada.</td>
-                  </tr>
-                  @endforelse
-               </tbody>
-            </table>
+                     @empty
+                     <tr>
+                        <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
+                     </tr>
+                     @endforelse
+                  </tbody>
+               </table>
+            </div>
          </div>
       </div>
    </div>
-</div>
+</section>
 
-<div class="card">
-   <div class="card-header">
-      <span class="text-muted text-uppercase">Solicitações não Aceitas</span>
-   </div>
-   <div class="card-body pt-1">
-      <div class="row">
-         <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
-               <thead>
-                  <tr>
-                     <th>Data da Reserva</th>
-                     <th>Quantidade Total</th>
-                     <th>Quantidade Aceita</th>
-                     <th>Em Posse</th>
-                     <th>Status</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">IFES</td>
-                     <td class="align-middle">
-                        <span class="badge badge-danger text-uppercase">Não Aceita</span>
-                     </td>
-                  </tr>
-               </tbody>
-            </table>
+<section class="cestas_que_sairam">
+   <div class="card">
+      <div class="card-header">
+         <span class="text-muted text-uppercase">Cestas que sairam</span>
+      </div>
+      <div class="card-body pt-1">
+         <div class="row">
+            <div class="card-body table-responsive p-0">
+               <table class="table table-hover text-nowrap table-striped">
+                  <thead>
+                     <tr>
+                        <th>Parceiro</th>
+                        <th>Família</th>
+                        <th>Status das cestas</th>
+                        <th></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     @forelse($cestasPorParceiro as $cesta)
+                     @if ($cesta->status === 'Em rota')
+                     <tr>
+                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
+                        <td class="align-middle">{{ $cesta->familia->representante->nome }}</td>
+                        <td class="align-middle">
+                           <span class="badge badge-warning text-uppercase text-white">{{ $cesta->status }}</span>
+                        </td>
+                        <td class="align-middle">
+                           <form action="{{ route('cestas.entrega_ifes', $cesta->id) }}" method="POST" id="form-entregar-cesta-{{ $cesta->id }}">
+                              @method('PUT')
+                              @csrf
+                              <input type="hidden" name="cesta_id" id="cesta_id" value="{{ $cesta->id }}">
+                              <button type="button" class="btn btn-warning btn-sm text-white entregar-cesta" data-id="{{ $cesta->id }}">
+                                 <i class="fas fa-check"></i>
+                              </button>
+                           </form>
+                        </td>
+                     </tr>
+                     @endif
+                     @empty
+                     <tr>
+                        <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
+                     </tr>
+                     @endforelse
+                  </tbody>
+               </table>
+            </div>
          </div>
       </div>
    </div>
-</div>
+</section>
 
-<div class="modal fade" id="modalCadastrarCesta" tabindex="-1" aria-labelledby="modalCadastrarCestaLabel" aria-hidden="true">
+<section class="cestas_entregues">
+   <div class="card">
+      <div class="card-header">
+         <span class="text-muted text-uppercase align-middle mr-2">Cestas Entregues</span>
+         <a href="#" class="btn btn-secondary btn-sm">
+            <i class="fas fa-search"></i>
+         </a>
+      </div>
+      <div class="card-body pt-1">
+         <div class="row">
+            <div class="card-body table-responsive p-0">
+               <table class="table table-hover text-nowrap table-striped">
+                  <thead>
+                     <tr>
+                        <th>Família</th>
+                        <th>Parceiro</th>
+                        <th>Ponto de Origem</th>
+                        <th>Status</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     @forelse($cestasPorParceiro as $cesta)
+                     @if ($cesta->status === 'Entregue')
+                     <tr>
+                        <td class="align-middle">{{ $cesta->familia->representante->nome }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-uppercase text-white"
+                              style="background-color: {{ $cesta->parceiro->sigla->color ?? '#28a745' }};">{{ $cesta->parceiro->sigla->name ?? $cesta->parceiro->name }}</span>
+                        </td>
+                        <td class="align-middle">{{ $cesta->ponto_origem }}</td>
+                        <td class="align-middle">
+                           <span class="badge badge-success text-uppercase">{{ $cesta->status }}</span>
+                        </td>
+                     </tr>
+                     @endif
+                     @empty
+                     <tr>
+                        <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
+                     </tr>
+                     @endforelse
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
+</section>
+
+<div class="modal fade" id="modalEntregarCesta" tabindex="-1" aria-labelledby="modalEntregarCesta" aria-hidden="true">
    <div class="modal-dialog modal-xl">
       <div class="modal-content">
          <div class="modal-header">
-            <h5 class="modal-title text-bold" id="modalCadastrarCestaLabel">Solicitar Cesta ao IFES</h5>
+            <h5 class="modal-title text-bold" id="modalEntregarCesta">Entregar Cesta Própria</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                <span aria-hidden="true">&times;</span>
             </button>
          </div>
          <div class="modal-body">
-            <form action="{{ route('cestas.store') }}" method="POST" id="form-cadastrar-cesta">
+            <form action="{{ route('cestas.entregaCestaPropria') }}" method="POST">
                @csrf
                <div class="row">
                   <div class="col">
                      <div class="form-group">
-                        <label for="parceiro">Parceiro</label>
-                        <input type="text" class="form-control" disabled value="{{ optional($parceiro)->name ?: 'Parceiro não encontrado' }}">
+                        <label for="familia_id">Família</label>
+                        <select name="familia_id" id="familia_id" class="form-control">
+                           <option selected disabled value="">Selecione uma Família</option>
+                           @forelse($familias as $familia)
+                           <option value="{{ $familia->id }}">{{ $familia->representante->nome }}</option>
+                           @empty
+                           <option value="">Nenhuma Família cadastrada</option>
+                           @endforelse
+                        </select>
                      </div>
                   </div>
                </div>
                <div class="row">
-                  <div class="col-12 col-md-6">
+                  <div class="col">
                      <div class="form-group">
-                        <label for="data_entrega">Data da Entrega Parcial</label>
-                        <input type="date" class="form-control" id="data_entrega" name="data_entrega">
-                     </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                     <div class="form-group">
-                        <label for="quantidade_total">Quantidade Total</label>
-                        <input type="text" class="form-control" id="quantidade_total" name="quantidade_total">
+                        <label for="data_entrega">Data da Entrega Para a Família</label>
+                        <input type="datetime-local" class="form-control" id="data_entrega" name="data_entrega">
                      </div>
                   </div>
                </div>
-            </form>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            <button type="submit" class="btn btn-success" form="form-cadastrar-cesta">Solicitar Cesta ao IFES</button>
+            <button type="submit" class="btn btn-success">Registrar Entrega Própria</button>
          </div>
+         </form>
       </div>
    </div>
 </div>
 @stop
+
+@section('js')
+<script>
+   $('.entregar-cesta').on('click', function() {
+      const cestaId = $(this).data('id');
+      Swal.fire({
+         title: 'Você deseja confirmar a entrega desta cesta?',
+         icon: 'question',
+         showCancelButton: true,
+         confirmButtonColor: '#28a745',
+         confirmButtonText: 'Sim',
+         cancelButtonText: 'Não',
+      }).then((result) => {
+         if (result.isConfirmed) {
+            document.getElementById(`form-entregar-cesta-${cestaId}`).submit();
+         }
+      });
+   });
+</script>
+
+@if (session('success'))
+<script>
+   Swal.fire({
+      icon: 'success',
+      title: 'Sucesso',
+      text: "{{ session('success') }}",
+   });
+</script>
+@endif
+@endsection

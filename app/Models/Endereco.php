@@ -14,9 +14,4 @@ class Endereco extends Model
       'estado',
       'cep',
    ];
-
-   public function pessoas()
-   {
-      return $this->hasMany(Pessoa::class);
-   }
 }

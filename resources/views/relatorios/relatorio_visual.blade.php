@@ -29,13 +29,15 @@
          </div>
          <!-- /.col -->
          <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box mb-3">
-               <span class="info-box-icon bg-success elevation-1"><i class="fas fa-address-card"></i></span>
-               <div class="info-box-content">
-                  <span class="info-box-text text-bold">Relatório de Parceiros</span>
+            <a href="{{ route('relatorios.relatorio_parceiro') }}">
+               <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fas fa-address-card"></i></span>
+                  <div class="info-box-content">
+                     <span class="info-box-text text-bold text-dark">Relatório de Parceiros</span>
+                  </div>
+                  <!-- /.info-box-content -->
                </div>
-               <!-- /.info-box-content -->
-            </div>
+            </a>
             <!-- /.info-box -->
          </div>
          <!-- /.col -->

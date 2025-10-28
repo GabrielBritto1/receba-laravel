@@ -26,6 +26,7 @@ return new class extends Migration
          $table->boolean('status')->default(true);
          $table->string('endereco');
          $table->foreignId('parceiro_id')->constrained('parceiros')->onDelete('cascade');
+         $table->foreignId('representante_id')->constrained('representantes')->onDelete('cascade');
          $table->timestamps();
       });
    }

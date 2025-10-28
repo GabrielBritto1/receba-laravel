@@ -8,6 +8,7 @@
 <div class="card">
    <div class="card-body">
       <form action="{{ route('parceiros.update', $parceiro->id) }}" method="POST">
+         @csrf
          @method('PUT')
          <div class="form-group">
             <div class="row">

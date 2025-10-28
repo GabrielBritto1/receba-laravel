@@ -7,15 +7,19 @@
 <div class="card">
    <div class="card-header">
       <div class="card-tools d-flex justify-content-end">
+         @can('is-admin')
          <button type="button" class="btn btn-success btn-sm mr-2 text-bold" data-toggle="modal" data-target="#cadastrarCoordenador">
             <i class="fas fa-plus"></i> Adicionar Coordenador
          </button>
+         @endcan
          <a href="#" class="btn btn-success btn-sm mr-2 text-bold">
             <i class="fas fa-plus"></i> Adicionar Secretário(a)
          </a>
+         @can('is-admin')
          <button type="button" class="btn btn-success btn-sm mr-2 text-bold" data-toggle="modal" data-target="#cadastrarParceiro">
             <i class="fas fa-plus"></i> Adicionar Parceiro
          </button>
+         @endcan
       </div>
    </div>
    <div class="card-body pt-1">
@@ -185,7 +189,7 @@
       let id = $(this).data('id');
       Swal.fire({
          icon: 'question',
-         title: 'Voce deseja ativar este parceiro?',
+         title: 'Você deseja ativar este parceiro?',
          showCancelButton: true,
          confirmButtonColor: '#28a745',
          confirmButtonText: 'Sim',
@@ -237,7 +241,7 @@
       let id = $(this).data('id');
       Swal.fire({
          icon: 'info',
-         title: 'Voce deseja excluir este parceiro?',
+         title: 'Você deseja excluir este parceiro?',
          showCancelButton: true,
          confirmButtonColor: '#dc3545',
          confirmButtonText: 'Sim',

@@ -13,8 +13,13 @@ return new class extends Migration
    {
       Schema::create('solicitacaos', function (Blueprint $table) {
          $table->id();
-         $table->date('data_entrega');
-         $table->string('quantidade_total');
+         $table->dateTime('data_previsao_entrega');
+         $table->dateTime('data_aceito')->nullable();
+         $table->dateTime('data_montada')->nullable();
+         $table->dateTime('data_entrega')->nullable();
+         $table->string('quantidade_solicitada');
+         $table->string('quantidade_aceita')->nullable();
+         $table->string('quantidade_nao_aceita')->nullable();
          $table->string('status')->default('Em Análise');
          $table->foreignId('parceiro_id')->constrained('parceiros')->onDelete('cascade');
          $table->timestamps();

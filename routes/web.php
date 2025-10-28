@@ -2,13 +2,14 @@
 
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CestaController;
-use App\Http\Controllers\EntregaController;
 use App\Http\Controllers\FamiliaController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ParceiroController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\RelatorioPdfController;
+use App\Http\Controllers\SolicitacaoController;
 use App\Http\Middleware\CheckIfIsAdmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -48,19 +49,34 @@ Route::middleware('auth')->group(function () {
    //FAMILIAS
    Route::get('/familias', [FamiliaController::class, 'index'])->name('familias.index');
    Route::post('/familias', [FamiliaController::class, 'store'])->name('familias.store');
+   Route::get('/familias/create', [FamiliaController::class, 'create'])->name('familias.create');
+   Route::get('/familias/{familia}/show', [FamiliaController::class, 'show'])->name('familias.show');
+   Route::get('/familias/{familia}/edit', [FamiliaController::class, 'edit'])->name('familias.edit');
+   Route::put('/familias/{familia}', [FamiliaController::class, 'update'])->name('familias.update');
+   Route::delete('/familias/{familia}/destroy', [FamiliaController::class, 'destroy'])->name('familias.destroy');
+   Route::get('/familias/{familia}/cestas', [FamiliaController::class, 'getCestas'])->name('familias.getCestas');
+   Route::post('/familias/check-cpf', [FamiliaController::class, 'checkCpf'])->name('familias.checkCpf');
+   Route::post('/familias/importar', [FamiliaController::class, 'importStore'])->name('familias.import.store');
+   Route::get('/familias/{familia}/importacao_cpf', [FamiliaController::class, 'importacaoCpf'])->name('familias.importacao_cpf');
 
    //CESTAS
    Route::get('/cestas', [CestaController::class, 'index'])->name('cestas.index');
    Route::post('/cestas', [CestaController::class, 'store'])->name('cestas.store');
+   Route::put('/cestas/{cesta}', [CestaController::class, 'update'])->name('cestas.update');
+   Route::post('/cestas/entregaPropria', [CestaController::class, 'entregaCestaPropria'])->name('cestas.entregaCestaPropria');
+   Route::get('/cestas/entrega_familia/{cesta}', [CestaController::class, 'entregaFamilia'])->name('cestas.entrega_familia');
+   Route::put('/cestas/entrega_familia_store/{cesta}', [CestaController::class, 'entregaFamiliaStore'])->name('cestas.entrega_familia_store');
+   Route::put('/cestas/entrega_ifes/{cesta}', [CestaController::class, 'entregaFamiliaIfes'])->name('cestas.entrega_ifes');
 
    //ITENS
    Route::get('/itens', [ItemController::class, 'index'])->name('itens.index');
 
    //REGISTRAR_ENTREGA
-   Route::get('/entregas', [EntregaController::class, 'index'])->name('entregas.index');
-   Route::get('/entregas/gerenciar_cestas', [EntregaController::class, 'gerenciarCestas'])->name('entregas.gerenciar_cestas');
-   Route::get('/entregas/gerenciar_cestas/{cesta}', [EntregaController::class, 'atualizarStatusCesta'])->name('entregas.alterar_status_cesta');
-   Route::get('/entregas/gerenciar_itens', [EntregaController::class, 'gerenciarItens'])->name('entregas.gerenciar_itens');
+   Route::get('/solicitacoes', [SolicitacaoController::class, 'index'])->name('solicitacoes.index');
+   Route::post('/solicitacoes', [SolicitacaoController::class, 'store'])->name('solicitacoes.store');
+   Route::get('/solicitacoes/gerenciar_solicitacoes', [SolicitacaoController::class, 'gerenciarSolicitacoes'])->name('solicitacoes.gerenciar_solicitacoes');
+   Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao');
+   Route::get('/solicitacoes/gerenciar_itens', [SolicitacaoController::class, 'gerenciarItens'])->name('solicitacoes.gerenciar_itens');
 
    //RELATORIOS
    Route::get('/relatorios/relatorio_visual', [RelatorioController::class, 'RelatorioVisual'])->name('relatorios.relatorio_visual');
@@ -68,6 +84,7 @@ Route::middleware('auth')->group(function () {
    Route::get('/relatorios/relatorio_planilha', [RelatorioController::class, 'RelatorioPlanilha'])->name('relatorios.relatorio_planilha');
    //RELATORIOS_VISUAIS
    Route::get('/relatorios/relatorio_visuais_telas/relatorio_saida_de_cesta', [RelatorioController::class, 'RelatorioSaidaDeCesta'])->name('relatorios.relatorio_saida_de_cesta');
+   Route::get('/relatorios/relatorio_visuais_telas/relatorio_parceiro', [RelatorioController::class, 'RelatorioParceiro'])->name('relatorios.relatorio_parceiro');
    //RELATORIOS_PDF
    Route::get('/relatorios/relatorios_pdf/relatorio_saida_de_cesta_pdf', [RelatorioPdfController::class, 'relatorio_saida_de_cesta'])->name('relatorios_pdf.relatorio_saida_de_cesta_pdf');
    Route::get('/relatorios/relatorios_pdf/relatorio_parceiro_pdf', [RelatorioPdfController::class, 'relatorio_parceiro'])->name('relatorios_pdf.relatorio_parceiro_pdf');
@@ -75,14 +92,8 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', function () {
    return view('auth.login');
-})->name('dashboard');
+});
 
-Route::get('/dashboard', function () {
-   return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
 
 require __DIR__ . '/auth.php';
-
-Auth::routes();
-
-Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');

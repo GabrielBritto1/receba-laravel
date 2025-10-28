@@ -26,7 +26,6 @@ return new class extends Migration
          $table->string('nome_conjuge')->nullable();
          $table->date('data_nascimento_conjuge')->nullable();
          $table->string('rg')->nullable();
-         $table->foreignId('familia_id')->constrained('familias')->onDelete('cascade');
          $table->timestamps();
       });
    }

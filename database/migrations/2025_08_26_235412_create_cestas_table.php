@@ -13,11 +13,13 @@ return new class extends Migration
    {
       Schema::create('cestas', function (Blueprint $table) {
          $table->id();
-         $table->date('data_entrega');
-         $table->string('quantidade_total');
-         $table->string('status')->default('Em Análise');
+         $table->dateTime('data_recebimento')->nullable();
+         $table->dateTime('data_em_rota')->nullable();
+         $table->dateTime('data_entrega')->nullable();
          $table->string('ponto_origem')->default('IFES');
+         $table->string('status')->default('Não saiu para entrega');
          $table->foreignId('parceiro_id')->constrained('parceiros')->onDelete('cascade');
+         $table->foreignId('familia_id')->nullable()->constrained('familias')->onDelete('cascade');
          $table->timestamps();
       });
    }
