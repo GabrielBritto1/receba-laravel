@@ -112,7 +112,7 @@ class RelatorioController extends Controller
       // --- 4. FILTRO DE AUTORIZAÇÃO E PARCEIRO ---
       $user = Auth::user();
 
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          if ($request->filled('parceiro_id')) {
             $query->where('parceiro_id', $request->parceiro_id);
          }

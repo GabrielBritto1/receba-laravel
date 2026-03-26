@@ -71,7 +71,7 @@
          <div class="text-bold text-center text-sm">
             <h5>{{ Auth::user()->name }}</h5>
             <span>
-               @if(Auth::user()->parceiros())
+               @if(Auth::user()->parceiros->isNotEmpty())
                {{ Auth::user()->parceiros->pluck('name')->join('') }}
                @else
                Usuário sem Parceiro
@@ -80,7 +80,7 @@
             <br>
             <span>
                @if(Auth::user()->roles->isNotEmpty())
-               {{ Auth::user()->roles->pluck('formatted_name')->join('') }}
+               {{ Auth::user()->getRoleNames()->join('') }}
                @else
                Usuário sem Papel
                @endif
@@ -92,20 +92,20 @@
             <i class="fas fa-cog"></i>
             Configuração
          </a>
-         @can('is-admin')
-            <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif"
-               href="{{ route('users.gerenciar_usuarios') }}">
-               <i class="fas fa-id-badge"></i>
-               Gerenciar Usuários
-            </a>
-            <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif" href="#">
-               <i class="fas fa-shopping-bag"></i>
-               Controle Itens
-            </a>
-            <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif" href="{{ route('users.gerenciar_siglas') }}">
-               <i class="fas fa-tag"></i>
-               Gerenciar Siglas
-            </a>
+         @can('Administrador')
+         <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif"
+            href="{{ route('users.gerenciar_usuarios') }}">
+            <i class="fas fa-id-badge"></i>
+            Gerenciar Usuários
+         </a>
+         <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif" href="{{ route('roles.permissions.index') }}">
+            <i class="fas fa-user-shield"></i>
+            Controle de Acessos
+         </a>
+         <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif" href="{{ route('users.gerenciar_siglas') }}">
+            <i class="fas fa-tag"></i>
+            Gerenciar Siglas
+         </a>
          @endcan
          <a class="btn btn-default btn-flat float-right text-bold text-dark @if(!$profile_url) btn-block @endif"
             href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

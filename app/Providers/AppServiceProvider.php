@@ -21,18 +21,14 @@ class AppServiceProvider extends ServiceProvider
     */
    public function boot(): void
    {
-      Gate::define('is-admin', function (User $user): bool {
-         return $user->isAdmin();
+      Gate::define('Administrador', function (User $user): bool {
+         return $user->hasRole('Administrador');
       });
 
       Gate::define('owner', function (User $user, object $register): bool {
          return $user->id === $register->user_id;
       });
 
-      Gate::before(function (User $user, $ability) {
-         if ($user->abilities()->contains($ability)) {
-            return true;
-         }
-      });
+      // Com Spatie Permissions, o Gate usa automaticamente $user->can()
    }
 }

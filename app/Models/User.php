@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-   use HasFactory, Notifiable, SoftDeletes;
+   use HasFactory, Notifiable, SoftDeletes, HasRoles;
 
    /**
     * The attributes that are mass assignable.
@@ -51,18 +52,18 @@ class User extends Authenticatable
       return in_array($this->email, config('custom.admins'));
    }
 
-   public function roles()
-   {
-      return $this->belongsToMany(Role::class);
-   }
-
-   public function abilities()
-   {
-      return $this->roles->map->abilities->flatten()->pluck('name');
-   }
-
    public function parceiros()
    {
       return $this->belongsToMany(Parceiro::class);
+   }
+
+   public function coordenador()
+   {
+      return $this->hasOne(Coordenador::class);
+   }
+
+   public function secretario()
+   {
+      return $this->hasOne(Secretario::class);
    }
 }

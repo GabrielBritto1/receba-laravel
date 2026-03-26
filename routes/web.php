@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CestaController;
 use App\Http\Controllers\FamiliaController;
@@ -14,37 +15,45 @@ use App\Http\Middleware\CheckIfIsAdmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')
-   ->group(function () {
-      // Route::resource('/users', UserController::class);
-      Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-      Route::get('/users/gerenciar_usuarios', [UserController::class, 'gerenciarUsuarios'])->name('users.gerenciar_usuarios');
-      Route::get('/users/gerenciar_siglas', [UserController::class, 'gerenciarSiglas'])->name('users.gerenciar_siglas');
-      Route::post('/users', [UserController::class, 'store'])->name('users.store');
-      Route::get('/users', [UserController::class, 'index'])->name('users.index');
-      Route::post('/parceiros/storeCoordenador', [UserController::class, 'storeCoordenador'])->name('parceiros.storeCoordenador');
-      Route::delete('/users/{user}/destroy', [UserController::class, 'destroy'])->name('users.destroy')->middleware(CheckIfIsAdmin::class);
-      Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
-      Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-      Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-      Route::get('/users/{user}/configuracao', [UserController::class, 'configuracao'])->name('users.configuracao');
+Route::middleware('auth')->group(function () {
+   Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+   Route::get('/users/gerenciar_usuarios', [UserController::class, 'gerenciarUsuarios'])->name('users.gerenciar_usuarios');
+   Route::get('/users/gerenciar_siglas', [UserController::class, 'gerenciarSiglas'])->name('users.gerenciar_siglas');
+   Route::post('/users', [UserController::class, 'store'])->name('users.store');
+   Route::get('/users', [UserController::class, 'index'])->name('users.index');
+   Route::delete('/users/{user}/destroy', [UserController::class, 'destroy'])->name('users.destroy')->middleware(CheckIfIsAdmin::class);
+   Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+   Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+   Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+   Route::get('/users/{user}/configuracao', [UserController::class, 'configuracao'])->name('users.configuracao');
+
+   Route::middleware('can:Administrador')->group(function () {
+      Route::get('/roles/permissions', [RolePermissionController::class, 'index'])->name('roles.permissions.index');
+      Route::post('/roles/permissions', [RolePermissionController::class, 'update'])->name('roles.permissions.update');
    });
 
-Route::middleware('auth')->group(function () {
    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
    //PARCEIROS
-   Route::get('/parceiros', [ParceiroController::class, 'index'])->name('parceiros.index');
-   Route::post('/parceiros', [ParceiroController::class, 'store'])->name('parceiros.store');
-   Route::get('/parceiros/create', [ParceiroController::class, 'create'])->name('parceiros.create');
-   Route::post('/parceiros/{parceiro}/toggleStatus', [ParceiroController::class, 'toggleStatus'])->name('parceiros.toggleStatus');
+   Route::middleware('role:Administrador')->group(function () {
+      Route::get('/parceiros', [ParceiroController::class, 'index'])->name('parceiros.index')->middleware('can:parceiros.read');
+      Route::post('/parceiros', [ParceiroController::class, 'store'])->name('parceiros.store');
+      Route::get('/parceiros/create', [ParceiroController::class, 'create'])->name('parceiros.create');
+      Route::post('/parceiros/{parceiro}/toggleStatus', [ParceiroController::class, 'toggleStatus'])->name('parceiros.toggleStatus');
+      Route::delete('/parceiros/{parceiro}/destroy', [ParceiroController::class, 'destroy'])->name('parceiros.destroy');
+      Route::post('/parceiros/{parceiro}/sigla', [ParceiroController::class, 'alterarSigla'])->name('parceiros.alterarSigla');
+      Route::post('/parceiros/storeCoordenador', [UserController::class, 'storeCoordenador'])->name('parceiros.storeCoordenador');
+      Route::post('/parceiros/storeSecretario', [UserController::class, 'storeSecretario'])->name('parceiros.storeSecretario');
+   });
+
+   Route::get('/parceiros/list', [ParceiroController::class, 'list']);
+   Route::get('/parceiros/meu_parceiro', [ParceiroController::class, 'meuParceiro'])->name('parceiros.meu_parceiro');
    Route::get('/parceiros/{parceiro}/show', [ParceiroController::class, 'show'])->name('parceiros.show');
    Route::get('/parceiros/{parceiro}/edit', [ParceiroController::class, 'edit'])->name('parceiros.edit');
    Route::put('/parceiros/{parceiro}', [ParceiroController::class, 'update'])->name('parceiros.update');
-   Route::delete('/parceiros/{parceiro}/destroy', [ParceiroController::class, 'destroy'])->name('parceiros.destroy');
-   Route::post('/parceiros/{parceiro}/sigla', [ParceiroController::class, 'alterarSigla'])->name('parceiros.alterarSigla');
+   Route::post('/parceiros/storeSecretarioAssociar', [UserController::class, 'storeSecretarioAssociar'])->name('parceiros.storeSecretarioAssociar');
 
    //FAMILIAS
    Route::get('/familias', [FamiliaController::class, 'index'])->name('familias.index');

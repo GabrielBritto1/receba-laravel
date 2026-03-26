@@ -18,6 +18,7 @@ return new class extends Migration
          $table->string('telefone');
          $table->string('cep');
          $table->string('cnpj')->nullable();
+         $table->string('local_atuacao');
          $table->boolean('status')->default(1);
          $table->timestamps();
       });

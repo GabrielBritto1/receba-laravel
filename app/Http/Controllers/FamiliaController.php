@@ -22,7 +22,7 @@ class FamiliaController extends Controller
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          $familias = Familia::all();
       } else {
          $familias = collect();

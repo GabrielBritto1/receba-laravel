@@ -130,6 +130,7 @@
     @endif
 
     {{-- Custom Scripts --}}
+    <script src="{{ asset('assets/js/number_formarter.js') }}"></script>
     @yield('adminlte_js')
 
 </body>

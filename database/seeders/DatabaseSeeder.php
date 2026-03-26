@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,32 +22,18 @@ class DatabaseSeeder extends Seeder
          'email' => $_ENV['LOGIN_USER_ADMIN'],
          'password' => Hash::make($_ENV['SENHA_USER_ADMIN'])
       ]);
-      DB::table('roles')->insert([
-         'name' => 'is-admin',
-      ]);
-      DB::table('roles')->insert([
-         'name' => 'coordenador',
-      ]);
-      DB::table('roles')->insert([
-         'name' => 'secretario',
-      ]);
-      DB::table('abilities')->insert([
-         'name' => 'is-admin',
-      ]);
-      DB::table('abilities')->insert([
-         'name' => 'coordenador',
-      ]);
-      DB::table('role_user')->insert([
-         'user_id' => 1,
-         'role_id' => 1,
-      ]);
-      DB::table('ability_role')->insert([
-         'role_id' => 1,
-         'ability_id' => 1,
-      ]);
-      DB::table('ability_role')->insert([
-         'role_id' => 2,
-         'ability_id' => 2,
-      ]);
+      $adminRole = Role::create(['name' => 'Administrador']);
+      $coordenadorRole = Role::create(['name' => 'Coordenador']);
+      $secretarioRole = Role::create(['name' => 'Secretario']);
+
+      $this->call(PermissionSeeder::class);
+
+      // Admin tem todas as permissões por padrão
+      $adminRole->givePermissionTo(Permission::all());
+
+      $admin = User::first();
+      if ($admin) {
+         $admin->assignRole($adminRole);
+      }
    }
 }

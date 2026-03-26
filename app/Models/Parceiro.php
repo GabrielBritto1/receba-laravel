@@ -12,6 +12,7 @@ class Parceiro extends Model
       'telefone',
       'cep',
       'cnpj',
+      'local_atuacao',
       'status',
    ];
 
@@ -38,5 +39,33 @@ class Parceiro extends Model
    public function solicitacoes()
    {
       return $this->hasMany(Solicitacao::class);
+   }
+
+   //FORMATTERS
+   public function getTelefoneFormatadoAttribute()
+   {
+      $value = preg_replace('/\D/', '', $this->telefone);
+
+      return strlen($value) === 11
+         ? preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $value)
+         : preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $value);
+   }
+
+   public function getCnpjFormatadoAttribute()
+   {
+      $value = preg_replace('/\D/', '', $this->cnpj);
+
+      if (strlen($value) !== 14) return $this->cnpj;
+
+      return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $value);
+   }
+
+   public function getCepFormatadoAttribute()
+   {
+      $value = preg_replace('/\D/', '', $this->cep);
+
+      if (strlen($value) !== 8) return $this->cep;
+
+      return preg_replace('/(\d{5})(\d{3})/', '$1-$2', $value);
    }
 }
