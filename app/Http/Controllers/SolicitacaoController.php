@@ -87,7 +87,7 @@ class SolicitacaoController extends Controller
 
    public function gerenciarSolicitacoes()
    {
-      $this->authorize('is-admin');
+      $this->authorize('Administrador');
       $solicitacaoEmAnalise = Solicitacao::where('status', 'Em Análise')->orderBy('created_at', 'desc')->get();
       $solicitacaoAceita = Solicitacao::where('status', 'Aceita')->orderBy('created_at', 'desc')->get();
       $solicitacaoMontada = Solicitacao::where('status', 'Montada')->orderBy('created_at', 'desc')->get();

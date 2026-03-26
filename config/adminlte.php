@@ -308,38 +308,42 @@ return [
          'text' => 'GERENCIAR PARCEIROS',
          'url'  => 'parceiros',
          'icon' => 'fas fa-address-card',
-         'can' => 'is-admin',
+         'can' => 'menu.parceiros.view'
       ],
       [
-         'text' => 'SEU PARCEIRO',
-         'url'  => 'parceiros',
+         'text' => 'MEU PARCEIRO',
+         'url'  => 'parceiros/meu_parceiro',
          'icon' => 'fas fa-address-card',
-         'can' => 'coordenador',
+         'can' => 'menu.meu.parceiro.view',
       ],
       [
          'text' => 'GERENCIAR FAMILIAS',
          'url'  => 'familias',
          'icon' => '	fas fa-user-friends',
+         'can' => 'menu.familias.view'
       ],
       [
          'text' => 'SOLICITAR CESTAS',
          'url'  => 'solicitacoes',
          'icon' => 'fas fa-shopping-basket',
+         'can' => 'menu.cestas.view'
       ],
       [
          'text' => 'SOLICITAR ITENS',
          'url'  => 'itens',
          'icon' => 'fas fa-shopping-bag',
+         'can' => 'menu.itens.view'
       ],
       [
          'text' => 'REGISTRAR ENTREGA',
          'url'  => 'cestas',
          'icon' => 'fas fa-calendar-plus',
+         'can' => 'menu.entregas.view'
       ],
       [
          'text' => 'GERENCIAMENTO',
          'icon' => '	fas fa-folder-open',
-         'can' => 'is-admin',
+         'can' => 'menu.gerenciamento.view',
          'submenu' => [
             [
                'text' => 'GERENCIAR CESTAS',
@@ -356,6 +360,7 @@ return [
       [
          'text' => 'RELATÓRIOS',
          'icon' => 'fas fa-file-contract',
+         'can' => 'menu.relatorios.view',
          'submenu' => [
             [
                'text' => 'RELATÓRIOS VISUAIS',
@@ -366,11 +371,13 @@ return [
                'text' => 'RELATÓRIOS PDF',
                'url'  => 'relatorios/relatorio_pdf',
                'icon' => 'fas fa-file-pdf',
+               'can' => 'menu.relatorios.pdf.view',
             ],
             [
                'text' => 'RELATÓRIOS PLANILHA',
                'url'  => 'relatorios/relatorio_planilha',
                'icon' => 'fas fa-file-excel',
+               'can' => 'menu.relatorios.planilha.view',
             ],
          ]
       ],

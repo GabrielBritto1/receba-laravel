@@ -24,7 +24,7 @@
                   <td class="align-middle">{{ $parceiro->id }}</td>
                   <td class="align-middle">{{ $parceiro->name }}</td>
                   <td class="align-middle">
-                     <span class="badge badge-primary text-uppercase" style="background-color: {{ $parceiro->sigla?->color }};">
+                     <span class="badge badge-primary text-uppercase text-dark" style="background-color: {{ $parceiro->sigla?->color }};">
                         {{ $parceiro->sigla?->name }}
                      </span>
                   </td>

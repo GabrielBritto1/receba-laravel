@@ -30,7 +30,7 @@ class HomeController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          $cestas = Cesta::where('status', 'Entregue')->count();
       } else {
          $cestas = Cesta::where('status', 'Entregue')->where('parceiro_id', $parceiro->id)->count();
@@ -39,7 +39,7 @@ class HomeController extends Controller
       $parceiros = Parceiro::count();
       $familias = Familia::count();
 
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          $cestaPorAno = Cesta::selectRaw('YEAR(data_entrega) as ano, COUNT(*) as total, ponto_origem')
             ->whereNotNull('data_entrega')
             ->groupBy('ano', 'ponto_origem')

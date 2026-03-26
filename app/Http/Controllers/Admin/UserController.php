@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Coordenador;
 use App\Models\Parceiro;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+
 
 class UserController extends Controller
 {
@@ -64,11 +67,11 @@ class UserController extends Controller
 
    public function destroy(string $id)
    {
-      // if (Gate::allows('is-admin')) {
+      // if (Gate::allows('Administrador')) {
       //     return back()->with('message', 'Você não é um administrador!');
       // }
 
-      // if (Gate::denies('is-admin')) {
+      // if (Gate::denies('Administrador')) {
       //     return back()->with('message', 'Você não é um administrador!');
       // }
 
@@ -109,6 +112,9 @@ class UserController extends Controller
       $request->validate([
          'name' => 'required',
          'email' => 'required',
+         'endereco' => 'required',
+         'telefone' => 'required',
+         'cpf' => 'required'
       ]);
 
       $user = User::create([
@@ -116,7 +122,78 @@ class UserController extends Controller
          'email' => $request->email,
          'password' => Hash::make($request->email),
       ]);
-      $user->roles()->attach(2);
+      $user->coordenador()->create([
+         'endereco' => $request->endereco,
+         'telefone' => $request->telefone,
+         'cpf' => $request->cpf,
+      ]);
+      $role = Role::where('name', 'Coordenador')->first();
+      if ($role) {
+         $user->assignRole($role);
+      }
       return redirect()->route('parceiros.index')->with(['success' => 'Coordenador inserido com sucesso!', 'success_action' => 'storeCoordenador']);
+   }
+
+   public function storeSecretario(Request $request)
+   {
+      $request->validate([
+         'name' => 'required',
+         'email' => 'required',
+         'endereco' => 'required',
+         'telefone' => 'required',
+         'cpf' => 'required'
+      ]);
+
+      $user = User::create([
+         'name' => $request->name,
+         'email' => $request->email,
+         'password' => Hash::make($request->email),
+      ]);
+      $user->secretario()->create([
+         'endereco' => $request->endereco,
+         'telefone' => $request->telefone,
+         'cpf' => $request->cpf,
+      ]);
+      $role = Role::where('name', 'Secretario')->first();
+      if ($role) {
+         $user->assignRole($role);
+      }
+      return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
+   }
+
+   public function storeSecretarioAssociar(Request $request)
+   {
+      $request->validate([
+         'name' => 'required',
+         'email' => 'required',
+         'endereco' => 'required',
+         'telefone' => 'required',
+         'cpf' => 'required',
+         'parceiro_id' => 'required|exists:parceiros,id'
+      ]);
+
+      $user = User::create([
+         'name' => $request->name,
+         'email' => $request->email,
+         'password' => Hash::make($request->email),
+      ]);
+      $user->secretario()->create([
+         'endereco' => $request->endereco,
+         'telefone' => $request->telefone,
+         'cpf' => $request->cpf,
+      ]);
+
+      $user->parceiros()->attach($request->parceiro_id);
+
+      $role = Role::where('name', 'Secretario')->first();
+      if ($role) {
+         $user->assignRole($role);
+      }
+
+      if (Auth::user()->hasRole('Administrador')) {
+         return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
+      } else {
+         return redirect()->route('parceiros.meu_parceiro')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
+      }
    }
 }

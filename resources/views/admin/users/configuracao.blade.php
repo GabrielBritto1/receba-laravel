@@ -18,32 +18,32 @@
             <div class="card-body">
                <strong><i class="fas fa-user mr-1"></i> Nome</strong>
                <p class="text-muted">
-                  {{ Auth::user()->name }}
+                  {{ Auth::user()->name ?? '-' }}
                </p>
                <hr>
                <strong><i class="fas fa-address-card mr-1"></i> CPF</strong>
                <p class="text-muted">
-                  111.111.111-11
+                  {{ Auth::user()->coordenador->cpf ?? '-' }}
                </p>
                <hr>
                <strong><i class="fas fa-phone mr-1"></i> Telefone</strong>
                <p class="text-muted">
-                  (11) 1111-1111
+                  {{ Auth::user()->coordenador->telefone ?? '-' }}
                </p>
                <hr>
                <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
                <p class="text-muted">
-                  {{ Auth::user()->email }}
+                  {{ Auth::user()->email ?? '-' }}
                </p>
                <hr>
                <strong><i class="fas fa-map-marker-alt mr-1"></i> Endereço</strong>
                <p class="text-muted">
-                  Rua dos Bobos, 0
+                  {{ Auth::user()->coordenador->endereco ?? '-' }}
                </p>
                <hr>
                <strong><i class="fas fa-address-card mr-1"></i> Parceiro</strong>
                <p class="text-muted">
-                  {{ Auth::user()->parceiros->pluck('name')->join('') }}
+                  {{ Auth::user()->parceiros->pluck('name')->join('') ? : '-' }}
                </p>
             </div>
          </div>

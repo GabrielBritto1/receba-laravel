@@ -24,7 +24,7 @@
             </div>
 
             {{-- O filtro de parceiro só aparece se o usuário for admin --}}
-            @can('is-admin')
+            @can('Administrador')
             <div class="col-md-4">
                <div class="form-group">
                   <label>Parceiro da família:</label>

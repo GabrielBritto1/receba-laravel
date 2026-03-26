@@ -18,16 +18,50 @@ class ParceiroController extends Controller
    public function index()
    {
       $user = Auth::user();
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          $parceiros = Parceiro::all();
       } else {
          $parceiros = $user->parceiros->first();
          $parceiros = $parceiros ? [$parceiros] : [];
       }
       $coordenadores = User::whereHas('roles', function ($query) {
-         $query->where('name', 'coordenador');
+         $query->where('name', 'Coordenador');
       })->get();
-      return view('parceiros.index', compact('parceiros', 'coordenadores'));
+      $secretarios = User::whereHas('roles', function ($query) {
+         $query->where('name', 'Secretario');
+      })->get();
+      return view('parceiros.index', compact('parceiros', 'coordenadores', 'secretarios'));
+   }
+
+   public function list()
+   {
+      $parceiros = Parceiro::with('sigla')->orderBy('name')->paginate(15);
+
+      return response()->json([
+         'status' => 'success',
+         'data' => $parceiros->items(),
+         'pagination' => [
+            'current_page' => $parceiros->currentPage(),
+            'last_page' => $parceiros->lastPage(),
+         ]
+      ]);
+   }
+
+   public function meuParceiro()
+   {
+      $user = Auth::user();
+      $parceiros = $user->parceiros->first();
+      $parceiros = $parceiros ? [$parceiros] : [];
+
+      $users = User::whereHas('parceiros', function ($query) use ($parceiros) {
+         $query->whereIn('parceiro_id', collect($parceiros)->pluck('id'));
+      })->get();
+
+      $integrantes = $users->filter(function ($user) {
+         return $user;
+      });
+
+      return view('parceiros.meu_parceiro', compact('parceiros', 'integrantes'));
    }
 
 
@@ -51,21 +85,25 @@ class ParceiroController extends Controller
          'telefone' => 'required|string|max:15',
          'cep' => 'required|string|max:10',
          'cnpj' => 'nullable|string|max:18',
-         'user_id' => 'required|exists:users,id',
-      ]);
+         'local_atuacao' => 'required|string',
 
+         'coordenador_id' => 'required|exists:users,id',
+         'secretario_id' => 'nullable|exists:users,id',
+      ]);
 
       $parceiro = Parceiro::create([
          'name' => $validated['name'],
          'endereco' => $validated['endereco'],
          'telefone' => $validated['telefone'],
          'cep' => $validated['cep'],
+         'local_atuacao' => $validated['local_atuacao'],
          'cnpj' => $validated['cnpj'] ?? null,
       ]);
 
-
-      $parceiro->users()->attach($validated['user_id']);
-
+      $parceiro->users()->attach([
+         $validated['coordenador_id'],
+         $validated['secretario_id']
+      ]);
 
       return redirect()->route('parceiros.index')->with(['success' => 'Parceiro criado com sucesso!', 'success_action' => 'store']);
    }
@@ -76,8 +114,29 @@ class ParceiroController extends Controller
     */
    public function show(string $id)
    {
-      $parceiro = Parceiro::findOrFail($id);
-      return view('parceiros.show', compact('parceiro'));
+      $user = Auth::user();
+      if ($user->hasRole('Administrador')) {
+         $parceiro = Parceiro::with('users.roles')->findOrFail($id);
+         $coordenadores = $parceiro->users->filter(function ($user) {
+            return $user->hasRole('Coordenador');
+         });
+         $secretarios = $parceiro->users->filter(function ($user) {
+            return $user->hasRole('Secretario');
+         });
+      } else {
+         $parceiro = Auth::user()->parceiros->first();
+         if (!$parceiro || $parceiro->id != $id) {
+            abort(403, 'Você não tem permissão para acessar esse parceiro.');
+         }
+         $coordenadores = $parceiro->users->filter(function ($user) {
+            return $user->hasRole('Coordenador');
+         });
+         $secretarios = $parceiro->users->filter(function ($user) {
+            return $user->hasRole('Secretario');
+         });
+      }
+
+      return view('parceiros.show', compact('parceiro', 'coordenadores', 'secretarios'));
    }
 
 
@@ -86,7 +145,15 @@ class ParceiroController extends Controller
     */
    public function edit(string $id)
    {
-      $parceiro = Parceiro::findOrFail($id);
+      $user = Auth::user();
+      if ($user->hasRole('Administrador')) {
+         $parceiro = Parceiro::findOrFail($id);
+      } else {
+         $parceiro = Auth::user()->parceiros->first();
+         if (!$parceiro || $parceiro->id != $id) {
+            abort(403, 'Você não tem permissão para editar esse parceiro.');
+         }
+      }
       return view('parceiros.edit', compact('parceiro'));
    }
 

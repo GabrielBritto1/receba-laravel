@@ -19,7 +19,7 @@ class CestaController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
-      if ($user->can('is-admin')) {
+      if ($user->can('Administrador')) {
          $cestasPorParceiro = Cesta::latest()->get();
          $familias = Familia::all();
       } else {
