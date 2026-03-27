@@ -29,6 +29,7 @@
                      <th>Nome</th>
                      <th>Sigla</th>
                      <th>Telefone</th>
+                     <th>Local de Atuação</th>
                      <th>Status</th>
                      <th></th>
                   </tr>

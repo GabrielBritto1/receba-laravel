@@ -12,7 +12,6 @@
          <table class="table table-hover text-nowrap table-striped">
             <thead>
                <tr>
-                  <th>ID</th>
                   <th>Nome</th>
                   <th>Sigla</th>
                   <th></th>
@@ -21,7 +20,6 @@
             <tbody>
                @forelse($parceiros as $parceiro)
                <tr>
-                  <td class="align-middle">{{ $parceiro->id }}</td>
                   <td class="align-middle">{{ $parceiro->name }}</td>
                   <td class="align-middle">
                      <span class="badge badge-primary text-uppercase text-dark" style="background-color: {{ $parceiro->sigla?->color }};">

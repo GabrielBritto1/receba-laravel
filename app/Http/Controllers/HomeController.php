@@ -37,7 +37,7 @@ class HomeController extends Controller
       }
 
       $parceiros = Parceiro::count();
-      $familias = Familia::count();
+      $familias = Familia::join('representantes', 'familias.id', '=', 'representantes.id')->distinct('cpf')->count();
 
       if ($user->can('Administrador')) {
          $cestaPorAno = Cesta::selectRaw('YEAR(data_entrega) as ano, COUNT(*) as total, ponto_origem')

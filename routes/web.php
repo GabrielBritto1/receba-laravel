@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
 
    //FAMILIAS
    Route::get('/familias', [FamiliaController::class, 'index'])->name('familias.index');
+   Route::get('/familias/list', [FamiliaController::class, 'list']);
    Route::post('/familias', [FamiliaController::class, 'store'])->name('familias.store');
    Route::get('/familias/create', [FamiliaController::class, 'create'])->name('familias.create');
    Route::get('/familias/{familia}/show', [FamiliaController::class, 'show'])->name('familias.show');
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function () {
    Route::post('/familias/check-cpf', [FamiliaController::class, 'checkCpf'])->name('familias.checkCpf');
    Route::post('/familias/importar', [FamiliaController::class, 'importStore'])->name('familias.import.store');
    Route::get('/familias/{familia}/importacao_cpf', [FamiliaController::class, 'importacaoCpf'])->name('familias.importacao_cpf');
+   Route::post('/familias/{familia}/toggleStatus', [FamiliaController::class, 'toggleStatus'])->name('familias.toggleStatus');
 
    //CESTAS
    Route::get('/cestas', [CestaController::class, 'index'])->name('cestas.index');

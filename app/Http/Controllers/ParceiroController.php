@@ -193,7 +193,6 @@ class ParceiroController extends Controller
       $parceiro->status = !$parceiro->status;
       $parceiro->save();
 
-
       return redirect()->route('parceiros.index')->with('success', 'Status atualizado com sucesso!');
    }
 

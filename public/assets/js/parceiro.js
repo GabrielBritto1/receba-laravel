@@ -36,9 +36,11 @@ function loadPrincipal(page = 1) {
                         </span>
                      </td>
                      <td class="align-middle">${formatTelefone(item.telefone)}</td>
+                     <td class="align-middle">${item.local_atuacao}</td>
                      <td class="align-middle">${item.status == 1
                      ? '<span class="badge badge-success">ATIVO</span>'
-                     : '<span class="badge badge-danger">INATIVO</span>'}
+                     : '<span class="badge badge-danger">INATIVO</span>'
+                  }
                      </td>
                      <td>
                         <div class="btn-group float-right">

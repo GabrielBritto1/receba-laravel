@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Formatter;
 use Illuminate\Database\Eloquent\Model;
 
 class Familia extends Model
@@ -46,5 +47,15 @@ class Familia extends Model
    public function cestas()
    {
       return $this->hasMany(Cesta::class, 'familia_id');
+   }
+
+   public function getTelefoneFormatadoAttribute()
+   {
+      return Formatter::telefone($this->representante->telefone);
+   }
+
+   public function getCpfFormatadoAttribute()
+   {
+      return Formatter::cpf($this->representante->cpf);
    }
 }

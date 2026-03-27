@@ -14,9 +14,26 @@ class SolicitacaoController extends Controller
     */
    public function index()
    {
-      $solicitacoes = Solicitacao::orderBy('created_at', 'desc')->get();
-      $parceiro = Auth::user()->parceiros->first();
-      return view('solicitacoes.index', compact('solicitacoes', 'parceiro'));
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+      if ($user->can('Administrador')) {
+         $solicitacoes = Solicitacao::orderBy('created_at', 'desc')->paginate(15);
+         $solicitacoesNaoAceitas = Solicitacao::where('quantidade_nao_aceita', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+      } else {
+         $solicitacoes = collect();
+         if ($parceiro) {
+            $solicitacoes = Solicitacao::where('parceiro_id', $parceiro->id)
+               ->orderBy('created_at', 'desc')
+               ->paginate(15);
+            $solicitacoesNaoAceitas = Solicitacao::where('quantidade_nao_aceita', '>', 0)
+               ->where('parceiro_id', $parceiro->id)
+               ->orderBy('created_at', 'desc')
+               ->paginate(15);
+         }
+      }
+      return view('solicitacoes.index', compact('solicitacoes', 'parceiro', 'solicitacoesNaoAceitas'));
    }
 
    /**
@@ -88,11 +105,11 @@ class SolicitacaoController extends Controller
    public function gerenciarSolicitacoes()
    {
       $this->authorize('Administrador');
-      $solicitacaoEmAnalise = Solicitacao::where('status', 'Em Análise')->orderBy('created_at', 'desc')->get();
-      $solicitacaoAceita = Solicitacao::where('status', 'Aceita')->orderBy('created_at', 'desc')->get();
-      $solicitacaoMontada = Solicitacao::where('status', 'Montada')->orderBy('created_at', 'desc')->get();
-      $solicitacaoEntregue = Solicitacao::where('status', 'Entregue')->orderBy('created_at', 'desc')->get();
-      $solicitacaoNaoAceita = Solicitacao::where('quantidade_nao_aceita', '>', 0)->orderBy('created_at', 'desc')->get();
+      $solicitacaoEmAnalise = Solicitacao::where('status', 'Em Análise')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoAceita = Solicitacao::where('status', 'Aceita')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoMontada = Solicitacao::where('status', 'Montada')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoEntregue = Solicitacao::where('status', 'Entregue')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoNaoAceita = Solicitacao::where('quantidade_nao_aceita', '>', 0)->orderBy('created_at', 'desc')->paginate(15);
 
       return view('solicitacoes.gerenciar_solicitacoes', compact('solicitacaoEmAnalise', 'solicitacaoAceita', 'solicitacaoMontada', 'solicitacaoEntregue', 'solicitacaoNaoAceita'));
    }

@@ -9,9 +9,15 @@
       <div class="card-header">
          <span class="text-muted text-uppercase">Cestas que ainda não sairam</span>
          <div class="card-tools">
+            @if ($parceiro && $parceiro->status != 0)
             <a href="#" class="btn btn-success btn-sm text-bold" data-toggle="modal" data-target="#modalEntregarCesta">
                <i class="fas fa-plus"></i> Registrar Entrega Própria
             </a>
+            @else
+            <button class="btn btn-secondary btn-sm text-bold" disabled title="Você não está vinculado a nenhum parceiro">
+               <i class="fas fa-plus"></i> Registrar Entrega Própria
+            </button>
+            @endif
          </div>
       </div>
       <div class="card-body pt-1">

@@ -22,16 +22,39 @@ class FamiliaController extends Controller
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
-      if ($user->can('Administrador')) {
-         $familias = Familia::all();
+      return view('familias.index', compact('parceiro'));
+   }
+
+   public function list()
+   {
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+
+      if ($user->hasRole('Administrador')) {
+         $familias = Familia::select('familias.*')
+            ->join('representantes', 'familias.id', '=', 'representantes.id')
+            ->with(['representante', 'parceiro.sigla'])
+            ->orderBy('nome')
+            ->paginate(20);
       } else {
          $familias = collect();
          if ($parceiro) {
-            $cestasPorParceiro = Familia::where('parceiro_id', $parceiro->id)->get();
-            $familias = $parceiro->familias;
+            $familias = Familia::select('familias.*')
+               ->join('representantes', 'familias.id', '=', 'representantes.id')
+               ->with(['representante', 'parceiro.sigla'])
+               ->where('parceiro_id', $parceiro->id)
+               ->orderBy('nome')
+               ->paginate(20);
          }
       }
-      return view('familias.index', compact('familias'));
+      return response()->json([
+         'status' => 'success',
+         'familias' => $familias->items(),
+         'pagination' => [
+            'current_page' => $familias->currentPage(),
+            'last_page' => $familias->lastPage(),
+         ]
+      ]);
    }
 
    /**
@@ -134,7 +157,7 @@ class FamiliaController extends Controller
     */
    public function show(string $id)
    {
-      $familia = Familia::with('representante', 'membroFamilia', 'rendaFamilia')->findOrFail($id);
+      $familia = Familia::with(['representante', 'membroFamilia', 'rendaFamilia', 'cestas.parceiro'])->findOrFail($id);
       return view('familias.show', compact('familia'));
    }
 
@@ -143,7 +166,8 @@ class FamiliaController extends Controller
     */
    public function edit(string $id)
    {
-      //
+      $familia = Familia::with(['representante', 'membroFamilia', 'rendaFamilia', 'parceiro'])->findOrFail($id);
+      return view('familias.edit', compact('familia'));
    }
 
    /**
@@ -151,7 +175,107 @@ class FamiliaController extends Controller
     */
    public function update(Request $request, string $id)
    {
-      //
+      $familia = Familia::with(['representante', 'membroFamilia', 'rendaFamilia'])->findOrFail($id);
+      $representante = $familia->representante;
+      $membro = $familia->membroFamilia;
+      $renda = $familia->rendaFamilia;
+
+      $validated = $request->validate([
+         // Representante
+         'representante_nome' => 'required|string|max:255',
+         'representante_cpf' => 'required|string|max:20',
+         'representante_telefone' => 'nullable|string|max:20',
+         'representante_rg' => 'nullable|string|max:20',
+         'representante_data_nascimento' => 'nullable|date',
+         // Cônjuge
+         'nome_conjuge' => 'nullable|string|max:255',
+         'cpf_conjuge' => 'nullable|string|max:20',
+         'data_nascimento_conjuge' => 'nullable|date',
+         // Família
+         'endereco' => 'required|string|max:255',
+         'numero_casa' => 'nullable|string|max:20',
+         'bairro' => 'nullable|string|max:100',
+         'cidade' => 'nullable|string|max:100',
+         'reside' => 'nullable|string|max:100',
+         'aluguel' => 'nullable|string|max:100',
+         'cad_unico' => 'nullable|string|max:100',
+         'nis' => 'nullable|string|max:100',
+         'doenca_medicamento' => 'nullable|string|max:255',
+         'descricao' => 'nullable|string',
+         // Membros
+         'idosos' => 'nullable|integer',
+         'filhos_0a5' => 'nullable|integer',
+         'filhos_6a12' => 'nullable|integer',
+         'filhos_13a16' => 'nullable|integer',
+         'filhos_acima16' => 'nullable|integer',
+         // Renda
+         'pensao' => 'nullable|numeric',
+         'aposentadoria' => 'nullable|numeric',
+         'beneficio' => 'nullable|numeric',
+         'salario' => 'nullable|numeric',
+         'outros' => 'nullable|numeric',
+      ]);
+
+      DB::beginTransaction();
+      try {
+         // Atualiza representante
+         $representante->nome = $validated['representante_nome'];
+         $representante->cpf = $validated['representante_cpf'];
+         $representante->telefone = $validated['representante_telefone'];
+         $representante->rg = $validated['representante_rg'];
+         $representante->data_nascimento = $validated['representante_data_nascimento'];
+         $representante->nome_conjuge = $validated['nome_conjuge'];
+         $representante->cpf_conjuge = $validated['cpf_conjuge'];
+         $representante->data_nascimento_conjuge = $validated['data_nascimento_conjuge'];
+         $representante->save();
+
+         // Atualiza família
+         $familia->endereco = $validated['endereco'];
+         $familia->numero_casa = $validated['numero_casa'];
+         $familia->bairro = $validated['bairro'];
+         $familia->cidade = $validated['cidade'];
+         $familia->reside = $validated['reside'];
+         $familia->aluguel = $validated['aluguel'];
+         $familia->cad_unico = $validated['cad_unico'];
+         $familia->nis = $validated['nis'];
+         $familia->descricao = $validated['descricao'];
+         // Doença e medicamento (campo único na tela)
+         if (!empty($validated['doenca_medicamento'])) {
+            $partes = explode('/', $validated['doenca_medicamento'], 2);
+            $familia->doenca = trim($partes[0]);
+            $familia->medicamento = isset($partes[1]) ? trim($partes[1]) : null;
+         } else {
+            $familia->doenca = null;
+            $familia->medicamento = null;
+         }
+         $familia->save();
+
+         // Atualiza membros
+         if ($membro) {
+            $membro->idosos = $validated['idosos'] ?? 0;
+            $membro->filhos_0a5 = $validated['filhos_0a5'] ?? 0;
+            $membro->filhos_6a12 = $validated['filhos_6a12'] ?? 0;
+            $membro->filhos_13a16 = $validated['filhos_13a16'] ?? 0;
+            $membro->filhos_acima16 = $validated['filhos_acima16'] ?? 0;
+            $membro->save();
+         }
+
+         // Atualiza renda
+         if ($renda) {
+            $renda->pensao = $validated['pensao'] ?? 0;
+            $renda->aposentadoria = $validated['aposentadoria'] ?? 0;
+            $renda->beneficio = $validated['beneficio'] ?? 0;
+            $renda->salario = $validated['salario'] ?? 0;
+            $renda->outros = $validated['outros'] ?? 0;
+            $renda->save();
+         }
+
+         DB::commit();
+         return redirect()->route('familias.show', $familia->id)->with('success', 'Família atualizada com sucesso!');
+      } catch (\Exception $e) {
+         DB::rollBack();
+         return redirect()->back()->with('error', 'Erro ao atualizar família: ' . $e->getMessage())->withInput();
+      }
    }
 
    /**
@@ -159,7 +283,9 @@ class FamiliaController extends Controller
     */
    public function destroy(string $id)
    {
-      //
+      $familia = Familia::findOrFail($id);
+      $familia->delete();
+      return redirect()->route('familias.index')->with(['success' => 'Família excluída com sucesso!', 'success_action' => 'destroy']);
    }
 
    public function getCestas(Familia $familia)
@@ -285,5 +411,14 @@ class FamiliaController extends Controller
       }
 
       return redirect()->route('familias.index')->with('success', 'Família associada ao seu parceiro com sucesso!');
+   }
+
+   public function toggleStatus(string $id)
+   {
+      $familia = Familia::findOrFail($id);
+      $familia->status = !$familia->status;
+      $familia->save();
+
+      return redirect()->route('familias.index')->with('success', 'Status atualizado com sucesso!');
    }
 }
