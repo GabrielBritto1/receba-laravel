@@ -16,7 +16,7 @@ return new class extends Migration
          $table->string('numero_casa')->nullable();
          $table->string('bairro');
          $table->string('cidade');
-         $table->string('nis')->unique()->nullable();
+         $table->string('nis')->nullable();
          $table->string('doenca')->nullable();
          $table->string('medicamento')->nullable();
          $table->text('descricao')->nullable();

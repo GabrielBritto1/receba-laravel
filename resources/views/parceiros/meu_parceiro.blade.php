@@ -15,6 +15,7 @@
                      <th>Endereço</th>
                      <th>Telefone</th>
                      <th>CEP</th>
+                     <th>Local de Atuação</th>
                      <th>CNPJ</th>
                      <th>Status</th>
                      <th></th>
@@ -27,6 +28,7 @@
                      <td class="align-middle">{{ $parceiro->endereco }}</td>
                      <td class="align-middle">{{ $parceiro->telefone_formatado }}</td>
                      <td class="align-middle">{{ $parceiro->cep_formatado }}</td>
+                     <td class="align-middle">{{ $parceiro->local_atuacao }}</td>
                      <td class="align-middle">
                         @if($parceiro->cnpj == null)
                         Não possui CNPJ
@@ -49,7 +51,7 @@
                            <a href="{{ route('parceiros.edit', $parceiro->id) }}" class="btn btn-sm btn-warning btn-md text-white">
                               <i class="fas fa-edit"></i>
                            </a>
-                           <button type="button" class="btn btn-sm btn-secondary btn-md text-white" onclick="storeSecretarioAssociar({{ $parceiro->id }})">
+                           <button type="button" class="btn btn-sm btn-secondary btn-md text-white" onclick="storeSecretarioAssociar('{{ $parceiro->id }}')">
                               <i class="fas fa-user-plus"></i>
                            </button>
                         </div>

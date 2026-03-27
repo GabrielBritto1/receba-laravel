@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Formatter;
 use Illuminate\Database\Eloquent\Model;
 
 class Parceiro extends Model
@@ -44,28 +45,16 @@ class Parceiro extends Model
    //FORMATTERS
    public function getTelefoneFormatadoAttribute()
    {
-      $value = preg_replace('/\D/', '', $this->telefone);
-
-      return strlen($value) === 11
-         ? preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $value)
-         : preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $value);
+      return Formatter::telefone($this->telefone);
    }
 
    public function getCnpjFormatadoAttribute()
    {
-      $value = preg_replace('/\D/', '', $this->cnpj);
-
-      if (strlen($value) !== 14) return $this->cnpj;
-
-      return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $value);
+      return Formatter::cnpj($this->cnpj);
    }
 
    public function getCepFormatadoAttribute()
    {
-      $value = preg_replace('/\D/', '', $this->cep);
-
-      if (strlen($value) !== 8) return $this->cep;
-
-      return preg_replace('/(\d{5})(\d{3})/', '$1-$2', $value);
+      return Formatter::cep($this->cep);
    }
 }

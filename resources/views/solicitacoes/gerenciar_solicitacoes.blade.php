@@ -12,7 +12,7 @@
       <div class="card-body pt-1">
          <div class="row">
             <div class="card-body table-responsive p-0">
-               <table class="table table-hover text-nowrap table-striped">
+               <table class="table table-hover text-nowrap">
                   <thead>
                      <tr>
                         <th>Parceiro</th>
@@ -26,7 +26,11 @@
                   <tbody>
                      @forelse($solicitacaoEmAnalise as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                           </span>
+                        </td>
                         <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->quantidade_solicitada }}</td>
@@ -67,7 +71,7 @@
       <div class="card-body pt-1">
          <div class="row">
             <div class="card-body table-responsive p-0">
-               <table class="table table-hover text-nowrap table-striped">
+               <table class="table table-hover text-nowrap">
                   <thead>
                      <tr>
                         <th>Parceiro</th>
@@ -81,7 +85,11 @@
                   <tbody>
                      @forelse($solicitacaoAceita as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                           </span>
+                        </td>
                         <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
@@ -121,7 +129,7 @@
       <div class="card-body pt-1">
          <div class="row">
             <div class="card-body table-responsive p-0">
-               <table class="table table-hover text-nowrap table-striped">
+               <table class="table table-hover text-nowrap">
                   <thead>
                      <tr>
                         <th>Parceiro</th>
@@ -135,7 +143,11 @@
                   <tbody>
                      @forelse($solicitacaoMontada as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                           </span>
+                        </td>
                         <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
@@ -175,7 +187,7 @@
       <div class="card-body pt-1">
          <div class="row">
             <div class="card-body table-responsive p-0">
-               <table class="table table-hover text-nowrap table-striped">
+               <table class="table table-hover text-nowrap">
                   <thead>
                      <tr>
                         <th>Parceiro</th>
@@ -188,7 +200,11 @@
                   <tbody>
                      @forelse($solicitacaoEntregue as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                           </span>
+                        </td>
                         <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
                         <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
@@ -217,20 +233,26 @@
       <div class="card-body pt-1">
          <div class="row">
             <div class="card-body table-responsive p-0">
-               <table class="table table-hover text-nowrap table-striped">
+               <table class="table table-hover text-nowrap">
                   <thead>
                      <tr>
                         <th>Parceiro</th>
                         <th>Data de Reserva</th>
-                        <th>Quantidade</th>
+                        <th>Quantidade Solicitada</th>
+                        <th>Quantidade Não Aceita</th>
                         <th>Status das cestas</th>
                      </tr>
                   </thead>
                   <tbody>
                      @forelse($solicitacaoNaoAceita as $solicitacao)
                      <tr>
-                        <td class="align-middle">{{ $solicitacao->parceiro->name }}</td>
+                        <td class="align-middle">
+                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                           </span>
+                        </td>
                         <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
+                        <td class="align-middle">{{ $solicitacao->quantidade_solicitada }}</td>
                         <td class="align-middle">{{ $solicitacao->quantidade_nao_aceita }}</td>
                         <td class="align-middle">
                            <span class="badge badge-danger text-uppercase">Não Aceita</span>

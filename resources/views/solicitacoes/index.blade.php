@@ -22,10 +22,11 @@
    <div class="card-body pt-1">
       <div class="row">
          <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
+            <table class="table table-hover text-nowrap">
                <thead>
                   <tr>
                      <th>Data da Reserva</th>
+                     <th>Parceiro</th>
                      <th>Quantidade Total</th>
                      <th>Quantidade Aceita</th>
                      <th>Status</th>
@@ -33,10 +34,16 @@
                </thead>
                <tbody>
                   @forelse($solicitacoes as $solicitacao)
+                  @if (!$solicitacao->quantidade_nao_aceita != 0 || $solicitacao->quantidade_aceita != 0)
                   <tr>
                      <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y') }}</td>
+                     <td class="align-middle">
+                        <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                           {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                        </span>
+                     </td>
                      <td class="align-middle">{{ $solicitacao->quantidade_solicitada }}</td>
-                     <td class="align-middle">{{ $solicitacao->quantidade_aceita ?? $solicitacao->quantidade_solicitada}}</td>
+                     <td class="align-middle">{{ $solicitacao->quantidade_aceita ?? '-'}}</td>
                      @if ($solicitacao->status == 'Em Análise')
                      <td class="align-middle">
                         <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">Em Análise</span>
@@ -55,6 +62,7 @@
                      </td>
                      @endif
                   </tr>
+                  @endif
                   @empty
                   <tr>
                      <td colspan="5" class="text-center">Nenhuma solicitação encontrada.</td>
@@ -62,6 +70,7 @@
                   @endforelse
                </tbody>
             </table>
+
          </div>
       </div>
    </div>
@@ -74,31 +83,31 @@
    <div class="card-body pt-1">
       <div class="row">
          <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
+            <table class="table table-hover text-nowrap">
                <thead>
                   <tr>
                      <th>Data da Reserva</th>
+                     <th>Parceiro</th>
                      <th>Quantidade Total</th>
                      <th>Quantidade Não Aceita</th>
                      <th>Status</th>
                   </tr>
                </thead>
                <tbody>
-                  @forelse($solicitacoes as $solicitacao)
-                  @if ($solicitacao->quantidade_nao_aceita > 0)
+                  @forelse($solicitacoesNaoAceitas as $solicitacao)
                   <tr>
                      <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y') }}</td>
+                     <td class="align-middle">
+                        <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
+                           {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
+                        </span>
+                     </td>
                      <td class="align-middle">{{ $solicitacao->quantidade_solicitada }}</td>
                      <td class="align-middle">{{ $solicitacao->quantidade_nao_aceita }}</td>
                      <td class="align-middle">
                         <span class="badge badge-danger text-uppercase">Não Aceita</span>
                      </td>
                   </tr>
-                  @else
-                  <tr>
-                     <td colspan="5" class="text-center">Nenhuma solicitação não aceita.</td>
-                  </tr>
-                  @endif
                   @empty
                   <tr>
                      <td colspan="5" class="text-center">Nenhuma solicitação não aceita.</td>
@@ -106,6 +115,7 @@
                   @endforelse
                </tbody>
             </table>
+
          </div>
       </div>
    </div>

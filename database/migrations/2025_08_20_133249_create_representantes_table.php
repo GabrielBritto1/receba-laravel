@@ -13,7 +13,7 @@ return new class extends Migration
    {
       Schema::create('representantes', function (Blueprint $table) {
          $table->id();
-         $table->string('cpf')->unique();
+         $table->string('cpf');
          $table->string('nome');
          $table->date('data_nascimento');
          $table->string('uf', 2);
