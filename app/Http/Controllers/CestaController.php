@@ -19,19 +19,101 @@ class CestaController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
-      if ($user->can('Administrador')) {
-         $cestasPorParceiro = Cesta::latest()->get();
+      if ($user->hasRole('Administrador')) {
+         $cestasNaoSairam = Cesta::latest()
+            ->where('status', 'Não saiu para entrega')
+            ->paginate(2);
+         $cestasEmRota = Cesta::latest()
+            ->where('status', 'Em rota')
+            ->paginate(2);
+         $cestasEntregue = Cesta::latest()
+            ->where('status', 'Entregue')
+            ->paginate(2);
          $familias = Familia::all();
       } else {
          $cestasPorParceiro = collect();
          $familias = collect();
          if ($parceiro) {
-            $cestasPorParceiro = Cesta::where('parceiro_id', $parceiro->id)->get();
+            $cestasNaoSairam = Cesta::latest()
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Não saiu para entrega')
+               ->paginate(2);
+            $cestasEmRota = Cesta::latest()
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Em rota')
+               ->paginate(2);
+            $cestasEntregue = Cesta::latest()
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Entregue')
+               ->paginate(2);
             $familias = $parceiro->familias;
          }
       }
+      return view('cestas.index', compact('cestasNaoSairam', 'cestasEmRota', 'cestasEntregue', 'parceiro', 'familias'));
+   }
 
-      return view('cestas.index', compact('cestasPorParceiro', 'parceiro', 'familias'));
+   public function list()
+   {
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+
+      if ($user->hasRole('Administrador')) {
+         $cestasNaoSairam = Cesta::latest()
+            ->with(['parceiro.sigla', 'familia.representante'])
+            ->where('status', 'Não saiu para entrega')
+            ->paginate(15);
+         $cestasEmRota = Cesta::latest()
+            ->with(['parceiro.sigla', 'familia.representante'])
+            ->where('status', 'Em rota')
+            ->paginate(15);
+         $cestasEntregue = Cesta::latest()
+            ->with(['parceiro.sigla', 'familia.representante'])
+            ->where('status', 'Entregue')
+            ->paginate(15);
+         $familias = Familia::all();
+      } else {
+         $cestasNaoSairam = collect();
+         $cestasEmRota = collect();
+         $cestasEntregue = collect();
+         $familias = collect();
+         if ($parceiro) {
+            $cestasNaoSairam = Cesta::latest()
+               ->with(['parceiro.sigla', 'familia.representante'])
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Não saiu para entrega')
+               ->paginate(15);
+            $cestasEmRota = Cesta::latest()
+               ->with(['parceiro.sigla', 'familia.representante'])
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Em rota')
+               ->paginate(15);
+            $cestasEntregue = Cesta::orderBy('updated_at', 'desc')
+               ->with(['parceiro.sigla', 'familia.representante'])
+               ->where('parceiro_id', $parceiro->id)
+               ->where('status', 'Entregue')
+               ->paginate(15);
+            $familias = $parceiro->familias;
+         }
+      }
+      return response()->json([
+         'status' => 'success',
+         'cestasNaoSairam' => $cestasNaoSairam->items(),
+         'cestasEmRota' => $cestasEmRota->items(),
+         'cestasEntregue' => $cestasEntregue->items(),
+         'familias' => $familias,
+         'paginationNaoSairam' => [
+            'current_page' => $cestasNaoSairam->currentPage(),
+            'last_page' => $cestasNaoSairam->lastPage(),
+         ],
+         'paginationEmRota' => [
+            'current_page' => $cestasEmRota->currentPage(),
+            'last_page' => $cestasEmRota->lastPage(),
+         ],
+         'paginationEntregues' => [
+            'current_page' => $cestasEntregue->currentPage(),
+            'last_page' => $cestasEntregue->lastPage(),
+         ]
+      ]);
    }
 
    /**

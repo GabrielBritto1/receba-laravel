@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
 
    //CESTAS
    Route::get('/cestas', [CestaController::class, 'index'])->name('cestas.index');
+   Route::get('/cestas/list', [CestaController::class, 'list']);
    Route::post('/cestas', [CestaController::class, 'store'])->name('cestas.store');
    Route::put('/cestas/{cesta}', [CestaController::class, 'update'])->name('cestas.update');
    Route::post('/cestas/entregaPropria', [CestaController::class, 'entregaCestaPropria'])->name('cestas.entregaCestaPropria');
@@ -84,6 +85,8 @@ Route::middleware('auth')->group(function () {
 
    //REGISTRAR_ENTREGA
    Route::get('/solicitacoes', [SolicitacaoController::class, 'index'])->name('solicitacoes.index');
+   Route::get('/solicitacoes/list', [SolicitacaoController::class, 'list']);
+   Route::get('/solicitacoes/listNaoAceitas', [SolicitacaoController::class, 'listNaoAceitas']);
    Route::post('/solicitacoes', [SolicitacaoController::class, 'store'])->name('solicitacoes.store');
    Route::get('/solicitacoes/gerenciar_solicitacoes', [SolicitacaoController::class, 'gerenciarSolicitacoes'])->name('solicitacoes.gerenciar_solicitacoes');
    Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao');
