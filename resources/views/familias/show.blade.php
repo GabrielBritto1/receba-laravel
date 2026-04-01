@@ -128,7 +128,6 @@
          <table class="table table-striped">
             <thead>
                <tr>
-                  <th>ID</th>
                   <th>Parceiro</th>
                   <th>Status</th>
                   <th>Data Recebimento</th>
@@ -139,8 +138,11 @@
             <tbody>
                @foreach($familia->cestas as $cesta)
                <tr>
-                  <td>{{ $cesta->id }}</td>
-                  <td>{{ $cesta->parceiro->name ?? $cesta->parceiro->nome ?? 'N/A' }}</td>
+                  <td class="align-middle">
+                     <span class="badge text-uppercase"
+                        style="background-color: {{ $cesta->parceiro->sigla->color ?? '#f1f1f1' }};">
+                        {{ $cesta->parceiro->sigla->name ?? $cesta->parceiro->name }}</span>
+                  </td>
                   <td>{{ $cesta->status ? 'Entregue' : 'Pendente' }}</td>
                   <td>{{ optional($cesta->data_recebimento)->format('d/m/Y') ?? '-' }}</td>
                   <td>{{ optional($cesta->data_em_rota)->format('d/m/Y') ?? '-' }}</td>

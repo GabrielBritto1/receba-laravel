@@ -43,7 +43,7 @@
                               @method('PUT')
                               <input type="hidden" name="status" value="Aceita">
                               <input type="datetime-local" hidden name="data_aceito" value="{{ now()->format('Y-m-d\TH:i') }}">
-                              <input type="text" name="quantidade_aceita" required class="form-control form-control-sm text-center text-bold col-1 mr-1">
+                              <input type="text" name="quantidade_aceita" required class="form-control form-control-sm text-center text-bold col-2 mr-1">
                               <button type="submit" class="btn btn-warning btn-sm text-bold text-white">
                                  <i class="fas fa-check"></i> Aprovar
                               </button>

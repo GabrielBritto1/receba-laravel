@@ -13,3 +13,11 @@ function formatCpf(value) {
 
    return value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
+
+function formatDate(dateString) {
+   if (!dateString) return '-';
+
+   const date = new Date(dateString);
+
+   return date.toLocaleDateString('pt-BR');
+}

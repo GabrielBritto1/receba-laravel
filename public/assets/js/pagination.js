@@ -1,5 +1,5 @@
-function renderPagination(current, last) {
-   const $container = $('#paginationLinks');
+function renderPagination(current, last, containerId = 'paginationLinks', loadFunction = 'loadPrincipal') {
+   const $container = $(`#${containerId}`);
    $container.html('');
    if (last <= 1) return;
 
@@ -12,7 +12,7 @@ function renderPagination(current, last) {
       else classes += 'btn-light';
       if (disabled) classes += ' disabled';
 
-      html += `<button type="button" class="${classes}" ${disabled ? 'tabindex="-1" aria-disabled="true"' : `onclick="loadPrincipal(${page})"`}>${label}</button>`;
+      html += `<button type="button" class="${classes}" ${disabled ? 'tabindex="-1" aria-disabled="true"' : `onclick="${loadFunction}(${page})"`}>${label}</button>`;
    };
 
    // Anterior

@@ -32,29 +32,9 @@
                         <th></th>
                      </tr>
                   </thead>
-                  <tbody>
-                     @forelse($cestasPorParceiro as $cesta)
-                     @if ($cesta->status === 'Não saiu para entrega')
-                     <tr>
-                        <td class="align-middle">{{ $cesta->parceiro->name }}</td>
-                        <td class="align-middle">{{ $cesta->data_recebimento->format('d/m/Y') }}</td>
-                        <td class="align-middle">
-                           <span class="badge badge-danger text-uppercase">{{ $cesta->status }}</span>
-                        </td>
-                        <td class="align-middle">
-                           <a href="{{ route('cestas.entrega_familia', $cesta->id) }}" class="btn btn-warning btn-sm text-white">
-                              <i class="fas fa-shipping-fast"></i>
-                           </a>
-                        </td>
-                     </tr>
-                     @endif
-                     @empty
-                     <tr>
-                        <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
-                     </tr>
-                     @endforelse
-                  </tbody>
+                  <tbody id="listCestasNaoSairam"></tbody>
                </table>
+               <div id="paginationNaoSairam" class="mt-2 text-center"></div>
             </div>
          </div>
       </div>
@@ -72,6 +52,7 @@
                <table class="table table-hover text-nowrap table-striped">
                   <thead>
                      <tr>
+                        <th>Data em Rota</th>
                         <th>Parceiro</th>
                         <th>Família</th>
                         <th>Status das cestas</th>
@@ -79,8 +60,7 @@
                      </tr>
                   </thead>
                   <tbody>
-                     @forelse($cestasPorParceiro as $cesta)
-                     @if ($cesta->status === 'Em rota')
+                     @forelse($cestasEmRota as $cesta)
                      <tr>
                         <td class="align-middle">{{ $cesta->parceiro->name }}</td>
                         <td class="align-middle">{{ $cesta->familia->representante->nome }}</td>
@@ -98,7 +78,6 @@
                            </form>
                         </td>
                      </tr>
-                     @endif
                      @empty
                      <tr>
                         <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
@@ -126,104 +105,28 @@
                <table class="table table-hover text-nowrap table-striped">
                   <thead>
                      <tr>
-                        <th>Família</th>
+                        <th>Data de Entrega</th>
                         <th>Parceiro</th>
+                        <th>Família</th>
                         <th>Ponto de Origem</th>
                         <th>Status</th>
                      </tr>
                   </thead>
-                  <tbody>
-                     @forelse($cestasPorParceiro as $cesta)
-                     @if ($cesta->status === 'Entregue')
-                     <tr>
-                        <td class="align-middle">{{ $cesta->familia->representante->nome }}</td>
-                        <td class="align-middle">
-                           <span class="badge text-uppercase text-white"
-                              style="background-color: {{ $cesta->parceiro->sigla->color ?? '#28a745' }};">{{ $cesta->parceiro->sigla->name ?? $cesta->parceiro->name }}</span>
-                        </td>
-                        <td class="align-middle">{{ $cesta->ponto_origem }}</td>
-                        <td class="align-middle">
-                           <span class="badge badge-success text-uppercase">{{ $cesta->status }}</span>
-                        </td>
-                     </tr>
-                     @endif
-                     @empty
-                     <tr>
-                        <td colspan="4" class="text-center">Nenhuma cesta encontrada.</td>
-                     </tr>
-                     @endforelse
-                  </tbody>
+                  <tbody id="listCestasEntregue"></tbody>
                </table>
+               <div id="paginationEntregues" class="mt-2 text-center"></div>
             </div>
          </div>
       </div>
    </div>
 </section>
 
-<div class="modal fade" id="modalEntregarCesta" tabindex="-1" aria-labelledby="modalEntregarCesta" aria-hidden="true">
-   <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h5 class="modal-title text-bold" id="modalEntregarCesta">Entregar Cesta Própria</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-               <span aria-hidden="true">&times;</span>
-            </button>
-         </div>
-         <div class="modal-body">
-            <form action="{{ route('cestas.entregaCestaPropria') }}" method="POST">
-               @csrf
-               <div class="row">
-                  <div class="col">
-                     <div class="form-group">
-                        <label for="familia_id">Família</label>
-                        <select name="familia_id" id="familia_id" class="form-control">
-                           <option selected disabled value="">Selecione uma Família</option>
-                           @forelse($familias as $familia)
-                           <option value="{{ $familia->id }}">{{ $familia->representante->nome }}</option>
-                           @empty
-                           <option value="">Nenhuma Família cadastrada</option>
-                           @endforelse
-                        </select>
-                     </div>
-                  </div>
-               </div>
-               <div class="row">
-                  <div class="col">
-                     <div class="form-group">
-                        <label for="data_entrega">Data da Entrega Para a Família</label>
-                        <input type="datetime-local" class="form-control" id="data_entrega" name="data_entrega">
-                     </div>
-                  </div>
-               </div>
-         </div>
-         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            <button type="submit" class="btn btn-success">Registrar Entrega Própria</button>
-         </div>
-         </form>
-      </div>
-   </div>
-</div>
+@include('components.modals.entrega-propria-modal')
 @stop
 
 @section('js')
-<script>
-   $('.entregar-cesta').on('click', function() {
-      const cestaId = $(this).data('id');
-      Swal.fire({
-         title: 'Você deseja confirmar a entrega desta cesta?',
-         icon: 'question',
-         showCancelButton: true,
-         confirmButtonColor: '#28a745',
-         confirmButtonText: 'Sim',
-         cancelButtonText: 'Não',
-      }).then((result) => {
-         if (result.isConfirmed) {
-            document.getElementById(`form-entregar-cesta-${cestaId}`).submit();
-         }
-      });
-   });
-</script>
+<script src="/assets/js/cestas.js"></script>
+<script src="/assets/js/pagination.js"></script>
 
 @if (session('success'))
 <script>

@@ -16,11 +16,11 @@ class SolicitacaoController extends Controller
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
-      if ($user->can('Administrador')) {
-         $solicitacoes = Solicitacao::orderBy('created_at', 'desc')->paginate(15);
+      if ($user->hasRole('Administrador')) {
+         $solicitacoes = Solicitacao::orderBy('created_at', 'desc')->paginate(10);
          $solicitacoesNaoAceitas = Solicitacao::where('quantidade_nao_aceita', '>', 0)
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(10);
       } else {
          $solicitacoes = collect();
          if ($parceiro) {
@@ -34,6 +34,62 @@ class SolicitacaoController extends Controller
          }
       }
       return view('solicitacoes.index', compact('solicitacoes', 'parceiro', 'solicitacoesNaoAceitas'));
+   }
+
+   public function list()
+   {
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+      if ($user->hasRole('Administrador')) {
+         $solicitacoes = Solicitacao::with('parceiro.sigla')
+            ->where('quantidade_aceita', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+      } else {
+         $solicitacoes = collect();
+         if ($parceiro) {
+            $solicitacoes = Solicitacao::with('parceiro.sigla')
+               ->where('parceiro_id', $parceiro->id)
+               ->where('quantidade_aceita', '>', 0)
+               ->orderBy('created_at', 'desc')
+               ->paginate(15);
+         }
+      }
+      return response()->json([
+         'status' => 'success',
+         'solicitacoes' => $solicitacoes->items(),
+         'pagination' => [
+            'current_page' => $solicitacoes->currentPage(),
+            'last_page' => $solicitacoes->lastPage(),
+         ]
+      ]);
+   }
+
+   public function listNaoAceitas()
+   {
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+      if ($user->hasRole('Administrador')) {
+         $solicitacoesNaoAceitas = Solicitacao::with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+      } else {
+         $solicitacoesNaoAceitas = collect();
+         if ($parceiro) {
+            $solicitacoesNaoAceitas = Solicitacao::with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
+               ->where('parceiro_id', $parceiro->id)
+               ->orderBy('created_at', 'desc')
+               ->paginate(15);
+         }
+      }
+      return response()->json([
+         'status' => 'success',
+         'solicitacoesNaoAceitas' => $solicitacoesNaoAceitas->items(),
+         'paginationNaoAceitas' => [
+            'current_page' => $solicitacoesNaoAceitas->currentPage(),
+            'last_page' => $solicitacoesNaoAceitas->lastPage(),
+         ]
+      ]);
    }
 
    /**
