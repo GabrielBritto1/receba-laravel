@@ -82,25 +82,38 @@ Route::middleware('auth')->group(function () {
 
    //ITENS
    Route::get('/itens', [ItemController::class, 'index'])->name('itens.index');
+   Route::get('/itens/list', [ItemController::class, 'list']);
+   Route::get('/itens/listNaoAceitas', [ItemController::class, 'listNaoAceitas']);
+   Route::post('/itens', [ItemController::class, 'store'])->name('itens.store');
+   Route::get('/itens/catalogo', [ItemController::class, 'catalogo'])->name('itens.catalogo')->middleware('role:Administrador');
+   Route::post('/itens/catalogo', [ItemController::class, 'storeCatalogo'])->name('itens.catalogo.store')->middleware('role:Administrador');
+   Route::put('/itens/catalogo/{item}/toggle', [ItemController::class, 'toggleDisponivel'])->name('itens.catalogo.toggle')->middleware('role:Administrador');
+   Route::delete('/itens/catalogo/{item}', [ItemController::class, 'destroyCatalogo'])->name('itens.catalogo.destroy')->middleware('role:Administrador');
 
    //REGISTRAR_ENTREGA
    Route::get('/solicitacoes', [SolicitacaoController::class, 'index'])->name('solicitacoes.index');
    Route::get('/solicitacoes/list', [SolicitacaoController::class, 'list']);
    Route::get('/solicitacoes/listNaoAceitas', [SolicitacaoController::class, 'listNaoAceitas']);
    Route::post('/solicitacoes', [SolicitacaoController::class, 'store'])->name('solicitacoes.store');
-   Route::get('/solicitacoes/gerenciar_solicitacoes', [SolicitacaoController::class, 'gerenciarSolicitacoes'])->name('solicitacoes.gerenciar_solicitacoes');
-   Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao');
-   Route::get('/solicitacoes/gerenciar_itens', [SolicitacaoController::class, 'gerenciarItens'])->name('solicitacoes.gerenciar_itens');
+   Route::get('/solicitacoes/gerenciar_solicitacoes', [SolicitacaoController::class, 'gerenciarSolicitacoes'])->name('solicitacoes.gerenciar_solicitacoes')->middleware('role:Administrador');
+   Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao')->middleware('role:Administrador');
+   Route::get('/solicitacoes/gerenciar_itens', [ItemController::class, 'gerenciarItens'])->name('solicitacoes.gerenciar_itens')->middleware('role:Administrador');
+   Route::put('/solicitacoes/gerenciar_itens/{solicitacao}', [ItemController::class, 'atualizarStatusSolicitacao'])->name('itens.alterar_status_solicitacao')->middleware('role:Administrador');
 
    //RELATORIOS
    Route::get('/relatorios/relatorio_visual', [RelatorioController::class, 'RelatorioVisual'])->name('relatorios.relatorio_visual');
    Route::get('/relatorios/relatorio_pdf', [RelatorioController::class, 'RelatorioPdf'])->name('relatorios.relatorio_pdf');
    Route::get('/relatorios/relatorio_planilha', [RelatorioController::class, 'RelatorioPlanilha'])->name('relatorios.relatorio_planilha');
    //RELATORIOS_VISUAIS
+   Route::get('/relatorios/relatorio_visuais_telas/relatorio_familia', [RelatorioController::class, 'RelatorioFamilia'])->name('relatorios.relatorio_familia');
+   Route::get('/relatorios/relatorio_visuais_telas/relatorio_saida_de_cesta_por_parceiro', [RelatorioController::class, 'RelatorioSaidaDeCestaPorParceiro'])->name('relatorios.relatorio_saida_de_cesta_por_parceiro');
    Route::get('/relatorios/relatorio_visuais_telas/relatorio_saida_de_cesta', [RelatorioController::class, 'RelatorioSaidaDeCesta'])->name('relatorios.relatorio_saida_de_cesta');
    Route::get('/relatorios/relatorio_visuais_telas/relatorio_parceiro', [RelatorioController::class, 'RelatorioParceiro'])->name('relatorios.relatorio_parceiro');
    //RELATORIOS_PDF
+   Route::get('/relatorios/relatorios_pdf/relatorio_saida_de_cesta_por_parceiro_pdf', [RelatorioPdfController::class, 'relatorio_saida_de_cesta_por_parceiro'])->name('relatorios_pdf.relatorio_saida_de_cesta_por_parceiro_pdf');
+   Route::get('/relatorios/relatorios_pdf/relatorio_familia_pdf', [RelatorioPdfController::class, 'relatorio_familia'])->name('relatorios_pdf.relatorio_familia_pdf');
    Route::get('/relatorios/relatorios_pdf/relatorio_saida_de_cesta_pdf', [RelatorioPdfController::class, 'relatorio_saida_de_cesta'])->name('relatorios_pdf.relatorio_saida_de_cesta_pdf');
+   Route::get('/relatorios/relatorios_pdf/gerar_relatorio_saida_de_cesta_pdf', [RelatorioPdfController::class, 'gerar_relatorio_saida_de_cesta'])->name('relatorios_pdf.gerar_relatorio_saida_de_cesta_pdf');
    Route::get('/relatorios/relatorios_pdf/relatorio_parceiro_pdf', [RelatorioPdfController::class, 'relatorio_parceiro'])->name('relatorios_pdf.relatorio_parceiro_pdf');
 });
 

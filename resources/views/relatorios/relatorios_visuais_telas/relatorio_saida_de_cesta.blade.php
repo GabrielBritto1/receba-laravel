@@ -106,7 +106,15 @@
                   @if ($entregasNoMes->isNotEmpty())
                   {{-- Se houver entregas, exibe os dias --}}
                   @foreach ($entregasNoMes as $entrega)
-                  <span class="badge bg-success font-weight-bold">{{ $entrega->data_entrega->format('d') }}</span>
+                  @php
+                  $origemEhIfes = mb_strtoupper((string) $entrega->ponto_origem) === 'IFES';
+                  $corDoParceiro = optional(optional($entrega->parceiro)->sigla)->color ?? '#28a745';
+                  @endphp
+                  <span
+                     class="badge font-weight-bold {{ $origemEhIfes ? 'text-dark' : 'text-white' }}"
+                     style="{{ $origemEhIfes ? 'background-color: #ffc107;' : 'background-color: ' . $corDoParceiro . ';' }}">
+                     {{ $entrega->data_entrega->format('d') }}
+                  </span>
                   @endforeach
                   @else
                   -
