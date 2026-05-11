@@ -4,6 +4,55 @@
 <h1 class="text-bold"><i class="fas fa-cog"></i> Configurações</h1>
 @stop
 
+@section('css')
+<style>
+   .partner-timeline-card .timeline {
+      margin: 0;
+   }
+
+   .partner-timeline-card .timeline-item {
+      box-shadow: none;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+   }
+
+   .partner-timeline-card .time-label span {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+   }
+
+   .partner-timeline-card .timeline-header {
+      font-size: 0.95rem;
+   }
+
+   .partner-timeline-card .timeline-body {
+      color: #6c757d;
+      font-size: 0.9rem;
+   }
+
+   .partner-timeline-card .timeline-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+   }
+
+   .partner-timeline-card .timeline-subtitle {
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+   }
+
+   .partner-timeline-empty {
+      border: 1px dashed rgba(0, 0, 0, 0.15);
+      border-radius: 0.25rem;
+      padding: 1.5rem;
+      text-align: center;
+      color: #6c757d;
+      background: #f8f9fa;
+   }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid">
    <div class="row">
@@ -49,88 +98,71 @@
          </div>
       </div>
       <div class="col-md-9">
-         <div class="card">
+         <div class="card partner-timeline-card">
             <div class="card-header p-2"></div>
             <div class="card-body">
-               <div class="timeline timeline-inverse">
-                  <div class="time-label">
-                     <span class="bg-danger">
-                        10 Feb. 2014
-                     </span>
-                  </div>
-                  <div>
-                     <i class="fas fa-envelope bg-primary"></i>
-
-                     <div class="timeline-item">
-                        <span class="time"><i class="far fa-clock"></i> 12:05</span>
-
-                        <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>
-
-                        <div class="timeline-body">
-                           Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                           weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                           jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                           quora plaxo ideeli hulu weebly balihoo...
+               @if ($timelinePartner)
+               <div class="row">
+                  <div class="col-md-6">
+                     <div class="timeline-title">Últimos 7 dias</div>
+                     <div class="timeline-subtitle">Eventos recentes do parceiro {{ $timelinePartner->name }}.</div>
+                     @if ($weeklyTimeline->isEmpty())
+                     <div class="partner-timeline-empty">Nenhuma movimentação encontrada nos últimos 7 dias.</div>
+                     @else
+                     <div class="timeline timeline-inverse">
+                        @foreach ($weeklyTimeline as $group)
+                        <div class="time-label">
+                           <span class="bg-info">{{ $group['label'] }}</span>
                         </div>
-                        <div class="timeline-footer">
-                           <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                           <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                        @foreach ($group['items'] as $event)
+                        <div>
+                           <i class="{{ $event['icon'] }} {{ $event['background'] }}"></i>
+                           <div class="timeline-item">
+                              <span class="time"><i class="far fa-clock"></i> {{ $event['date']->format('H:i') }}</span>
+                              <h3 class="timeline-header">{{ $event['title'] }}</h3>
+                              <div class="timeline-body">{{ $event['description'] }}</div>
+                           </div>
                         </div>
-                     </div>
-                  </div>
-                  <div>
-                     <i class="fas fa-user bg-info"></i>
-
-                     <div class="timeline-item">
-                        <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-
-                        <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request
-                        </h3>
-                     </div>
-                  </div>
-                  <div>
-                     <i class="fas fa-comments bg-warning"></i>
-
-                     <div class="timeline-item">
-                        <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-
-                        <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-
-                        <div class="timeline-body">
-                           Take me to your leader!
-                           Switzerland is small and neutral!
-                           We are more like Germany, ambitious and misunderstood!
-                        </div>
-                        <div class="timeline-footer">
-                           <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>
+                        @endforeach
+                        @endforeach
+                        <div>
+                           <i class="far fa-clock bg-gray"></i>
                         </div>
                      </div>
+                     @endif
                   </div>
-                  <div class="time-label">
-                     <span class="bg-success">
-                        3 Jan. 2014
-                     </span>
-                  </div>
-                  <div>
-                     <i class="fas fa-camera bg-purple"></i>
-
-                     <div class="timeline-item">
-                        <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-
-                        <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>
-
-                        <div class="timeline-body">
-                           <img src="https://placehold.it/150x100" alt="...">
-                           <img src="https://placehold.it/150x100" alt="...">
-                           <img src="https://placehold.it/150x100" alt="...">
-                           <img src="https://placehold.it/150x100" alt="...">
+                  <div class="col-md-6">
+                     <div class="timeline-title">Últimos 30 dias</div>
+                     <div class="timeline-subtitle">Resumo mensal da operação do parceiro.</div>
+                     @if ($monthlyTimeline->isEmpty())
+                     <div class="partner-timeline-empty">Nenhuma movimentação encontrada nos últimos 30 dias.</div>
+                     @else
+                     <div class="timeline timeline-inverse">
+                        @foreach ($monthlyTimeline as $group)
+                        <div class="time-label">
+                           <span class="bg-success">{{ $group['label'] }}</span>
+                        </div>
+                        @foreach ($group['items'] as $event)
+                        <div>
+                           <i class="{{ $event['icon'] }} {{ $event['background'] }}"></i>
+                           <div class="timeline-item">
+                              <span class="time"><i class="far fa-clock"></i> {{ $event['date']->format('H:i') }}</span>
+                              <h3 class="timeline-header">{{ $event['title'] }}</h3>
+                              <div class="timeline-body">{{ $event['description'] }}</div>
+                           </div>
+                        </div>
+                        @endforeach
+                        @endforeach
+                        <div>
+                           <i class="far fa-clock bg-gray"></i>
                         </div>
                      </div>
-                  </div>
-                  <div>
-                     <i class="far fa-clock bg-gray"></i>
+                     @endif
                   </div>
                </div>
+               @else
+               <div class="partner-timeline-empty">Como você não tem parceiro, nao tem timeline</div>
+               @endif
             </div>
          </div>
       </div>

@@ -17,17 +17,18 @@ class SolicitacaoController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
       if ($user->hasRole('Administrador')) {
-         $solicitacoes = Solicitacao::orderBy('created_at', 'desc')->paginate(10);
-         $solicitacoesNaoAceitas = Solicitacao::where('quantidade_nao_aceita', '>', 0)
+         $solicitacoes = Solicitacao::cestas()->orderBy('created_at', 'desc')->paginate(10);
+         $solicitacoesNaoAceitas = Solicitacao::cestas()->where('quantidade_nao_aceita', '>', 0)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
       } else {
          $solicitacoes = collect();
+         $solicitacoesNaoAceitas = collect();
          if ($parceiro) {
-            $solicitacoes = Solicitacao::where('parceiro_id', $parceiro->id)
+            $solicitacoes = Solicitacao::cestas()->where('parceiro_id', $parceiro->id)
                ->orderBy('created_at', 'desc')
                ->paginate(15);
-            $solicitacoesNaoAceitas = Solicitacao::where('quantidade_nao_aceita', '>', 0)
+            $solicitacoesNaoAceitas = Solicitacao::cestas()->where('quantidade_nao_aceita', '>', 0)
                ->where('parceiro_id', $parceiro->id)
                ->orderBy('created_at', 'desc')
                ->paginate(15);
@@ -41,14 +42,14 @@ class SolicitacaoController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
       if ($user->hasRole('Administrador')) {
-         $solicitacoes = Solicitacao::with('parceiro.sigla')
+         $solicitacoes = Solicitacao::cestas()->with('parceiro.sigla')
             ->where('quantidade_aceita', '>', 0)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
       } else {
-         $solicitacoes = collect();
+         $solicitacoes = Solicitacao::cestas()->whereRaw('1 = 0')->paginate(15);
          if ($parceiro) {
-            $solicitacoes = Solicitacao::with('parceiro.sigla')
+            $solicitacoes = Solicitacao::cestas()->with('parceiro.sigla')
                ->where('parceiro_id', $parceiro->id)
                ->where('quantidade_aceita', '>', 0)
                ->orderBy('created_at', 'desc')
@@ -70,13 +71,13 @@ class SolicitacaoController extends Controller
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
       if ($user->hasRole('Administrador')) {
-         $solicitacoesNaoAceitas = Solicitacao::with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
+         $solicitacoesNaoAceitas = Solicitacao::cestas()->with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
       } else {
-         $solicitacoesNaoAceitas = collect();
+         $solicitacoesNaoAceitas = Solicitacao::cestas()->whereRaw('1 = 0')->paginate(15);
          if ($parceiro) {
-            $solicitacoesNaoAceitas = Solicitacao::with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
+            $solicitacoesNaoAceitas = Solicitacao::cestas()->with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
                ->where('parceiro_id', $parceiro->id)
                ->orderBy('created_at', 'desc')
                ->paginate(15);
@@ -118,6 +119,7 @@ class SolicitacaoController extends Controller
       ]);
 
       $solicitacao = Solicitacao::create([
+         'tipo' => 'cesta',
          'data_previsao_entrega' => $validated['data_previsao_entrega'],
          'quantidade_solicitada' => $validated['quantidade_solicitada'],
          'parceiro_id' => $parceiroId,
@@ -160,18 +162,20 @@ class SolicitacaoController extends Controller
 
    public function gerenciarSolicitacoes()
    {
-      $this->authorize('Administrador');
-      $solicitacaoEmAnalise = Solicitacao::where('status', 'Em Análise')->orderBy('created_at', 'desc')->paginate(15);
-      $solicitacaoAceita = Solicitacao::where('status', 'Aceita')->orderBy('created_at', 'desc')->paginate(15);
-      $solicitacaoMontada = Solicitacao::where('status', 'Montada')->orderBy('created_at', 'desc')->paginate(15);
-      $solicitacaoEntregue = Solicitacao::where('status', 'Entregue')->orderBy('created_at', 'desc')->paginate(15);
-      $solicitacaoNaoAceita = Solicitacao::where('quantidade_nao_aceita', '>', 0)->orderBy('created_at', 'desc')->paginate(15);
+      abort_unless(Auth::user()->hasRole('Administrador'), 403);
+      $solicitacaoEmAnalise = Solicitacao::cestas()->where('status', 'Em Análise')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoAceita = Solicitacao::cestas()->where('status', 'Aceita')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoMontada = Solicitacao::cestas()->where('status', 'Montada')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoEntregue = Solicitacao::cestas()->where('status', 'Entregue')->orderBy('created_at', 'desc')->paginate(15);
+      $solicitacaoNaoAceita = Solicitacao::cestas()->where('quantidade_nao_aceita', '>', 0)->orderBy('created_at', 'desc')->paginate(15);
 
       return view('solicitacoes.gerenciar_solicitacoes', compact('solicitacaoEmAnalise', 'solicitacaoAceita', 'solicitacaoMontada', 'solicitacaoEntregue', 'solicitacaoNaoAceita'));
    }
 
    public function atualizarStatusSolicitacao(Request $request, Solicitacao $solicitacao)
    {
+      abort_unless(Auth::user()->hasRole('Administrador'), 403);
+
       $validated = $request->validate([
          'status' => 'required|string',
          'quantidade_aceita' => 'nullable|string|integer|lte:' . $solicitacao->quantidade_solicitada,
@@ -201,7 +205,7 @@ class SolicitacaoController extends Controller
          $solicitacao->data_entrega = $validated['data_entrega'];
       }
 
-      if ($validated['status'] == 'Entregue' && $solicitacao->quantidade_aceita > 0) {
+      if ($solicitacao->tipo === 'cesta' && $validated['status'] == 'Entregue' && $solicitacao->quantidade_aceita > 0) {
          for ($i = 0; $i < $solicitacao->quantidade_aceita; $i++) {
             Cesta::create([
                'data_recebimento' => $solicitacao->data_entrega,

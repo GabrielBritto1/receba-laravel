@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Solicitacao extends Model
 {
    protected $fillable = [
+      'tipo',
       'data_previsao_entrega',
       'data_aceito',
       'data_montada',
@@ -16,6 +17,7 @@ class Solicitacao extends Model
       'quantidade_nao_aceita',
       'status',
       'parceiro_id',
+      'item_id',
    ];
 
    protected $casts = [
@@ -28,5 +30,20 @@ class Solicitacao extends Model
    public function parceiro()
    {
       return $this->belongsTo(Parceiro::class);
+   }
+
+   public function item()
+   {
+      return $this->belongsTo(Item::class);
+   }
+
+   public function scopeCestas($query)
+   {
+      return $query->where('tipo', 'cesta');
+   }
+
+   public function scopeItens($query)
+   {
+      return $query->where('tipo', 'item');
    }
 }

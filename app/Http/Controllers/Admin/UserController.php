@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Cesta;
 use App\Models\Coordenador;
+use App\Models\Familia;
 use App\Models\Parceiro;
+use App\Models\Solicitacao;
 use App\Models\User;
+use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,7 +97,17 @@ class UserController extends Controller
       if (!$user = User::find($id)) {
          return redirect()->route('/dashboard')->with('message', 'Usuário não encontrado!');
       }
-      return view('admin.users.configuracao', compact('user'));
+
+      $timelinePartner = $user->parceiros->first();
+      $weeklyTimeline = collect();
+      $monthlyTimeline = collect();
+
+      if ($timelinePartner) {
+         $weeklyTimeline = $this->buildTimelineGroups($timelinePartner, Carbon::now()->subDays(7), 8);
+         $monthlyTimeline = $this->buildTimelineGroups($timelinePartner, Carbon::now()->subDays(30), 14);
+      }
+
+      return view('admin.users.configuracao', compact('user', 'timelinePartner', 'weeklyTimeline', 'monthlyTimeline'));
    }
 
    public function gerenciarUsuarios()
@@ -195,5 +209,145 @@ class UserController extends Controller
       } else {
          return redirect()->route('parceiros.meu_parceiro')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
       }
+   }
+
+   private function buildTimelineGroups(Parceiro $parceiro, Carbon $since, int $limit)
+   {
+      $events = collect();
+
+      $familyEvents = Familia::with('representante:id,nome')
+         ->where('parceiro_id', $parceiro->id)
+         ->where('created_at', '>=', $since)
+         ->get()
+         ->map(function ($familia) {
+            $name = optional($familia->representante)->nome ?: 'Família';
+
+            return [
+               'date' => $familia->created_at,
+               'icon' => 'fas fa-user-plus',
+               'background' => 'bg-info',
+               'title' => 'Nova família cadastrada',
+               'description' => $name . ' foi vinculada ao parceiro.',
+            ];
+         });
+
+      $basketReceivedEvents = Cesta::where('parceiro_id', $parceiro->id)
+         ->whereNotNull('data_recebimento')
+         ->where('data_recebimento', '>=', $since)
+         ->get()
+         ->map(function ($cesta) {
+            return [
+               'date' => $cesta->data_recebimento,
+               'icon' => 'fas fa-box-open',
+               'background' => 'bg-primary',
+               'title' => 'Cesta recebida',
+               'description' => 'Uma cesta foi registrada no parceiro.',
+            ];
+         });
+
+      $basketRouteEvents = Cesta::with('familia.representante:id,nome')
+         ->where('parceiro_id', $parceiro->id)
+         ->whereNotNull('data_em_rota')
+         ->where('data_em_rota', '>=', $since)
+         ->get()
+         ->map(function ($cesta) {
+            $name = optional(optional($cesta->familia)->representante)->nome ?: 'família não identificada';
+
+            return [
+               'date' => $cesta->data_em_rota,
+               'icon' => 'fas fa-shipping-fast',
+               'background' => 'bg-warning',
+               'title' => 'Cesta saiu para entrega',
+               'description' => 'Saída registrada para ' . $name . '.',
+            ];
+         });
+
+      $basketDeliveredEvents = Cesta::with('familia.representante:id,nome')
+         ->where('parceiro_id', $parceiro->id)
+         ->whereNotNull('data_entrega')
+         ->where('data_entrega', '>=', $since)
+         ->get()
+         ->map(function ($cesta) {
+            $name = optional(optional($cesta->familia)->representante)->nome ?: 'família não identificada';
+
+            return [
+               'date' => $cesta->data_entrega,
+               'icon' => 'fas fa-check',
+               'background' => 'bg-success',
+               'title' => 'Cesta entregue',
+               'description' => 'Entrega concluída para ' . $name . '.',
+            ];
+         });
+
+      $requestCreatedEvents = Solicitacao::where('parceiro_id', $parceiro->id)
+         ->where('created_at', '>=', $since)
+         ->get()
+         ->map(function ($solicitacao) {
+            $tipo = $solicitacao->tipo === 'item' ? 'item(ns)' : 'cesta(s)';
+
+            return [
+               'date' => $solicitacao->created_at,
+               'icon' => 'fas fa-file-alt',
+               'background' => 'bg-secondary',
+               'title' => 'Solicitação criada',
+               'description' => 'Pedido com ' . $solicitacao->quantidade_solicitada . ' ' . $tipo . ' solicitado(s).',
+            ];
+         });
+
+      $requestAcceptedEvents = Solicitacao::where('parceiro_id', $parceiro->id)
+         ->whereNotNull('data_aceito')
+         ->where('data_aceito', '>=', $since)
+         ->get()
+         ->map(function ($solicitacao) {
+            $tipo = $solicitacao->tipo === 'item' ? 'item(ns)' : 'cesta(s)';
+
+            return [
+               'date' => $solicitacao->data_aceito,
+               'icon' => 'fas fa-thumbs-up',
+               'background' => 'bg-primary',
+               'title' => 'Solicitação aceita',
+               'description' => 'Aceite registrado com ' . $solicitacao->quantidade_aceita . ' ' . $tipo . '.',
+            ];
+         });
+
+      $requestDeliveredEvents = Solicitacao::where('parceiro_id', $parceiro->id)
+         ->whereNotNull('data_entrega')
+         ->where('data_entrega', '>=', $since)
+         ->get()
+         ->map(function ($solicitacao) {
+            $tipo = $solicitacao->tipo === 'item' ? 'itens' : 'cestas';
+
+            return [
+               'date' => $solicitacao->data_entrega,
+               'icon' => 'fas fa-hand-holding-heart',
+               'background' => 'bg-success',
+               'title' => 'Solicitação entregue',
+               'description' => 'Entrega da solicitação de ' . $tipo . ' concluída.',
+            ];
+         });
+
+      $events = $events
+         ->merge($familyEvents)
+         ->merge($basketReceivedEvents)
+         ->merge($basketRouteEvents)
+         ->merge($basketDeliveredEvents)
+         ->merge($requestCreatedEvents)
+         ->merge($requestAcceptedEvents)
+         ->merge($requestDeliveredEvents)
+         ->sortByDesc('date')
+         ->take($limit)
+         ->values();
+
+      return $events
+         ->groupBy(function ($event) {
+            return $event['date']->format('Y-m-d');
+         })
+         ->map(function ($items, $date) {
+            return [
+               'label' => Carbon::parse($date)->translatedFormat('d \\d\\e F'),
+               'items' => $items->values(),
+            ];
+         })
+         ->values();
    }
 }

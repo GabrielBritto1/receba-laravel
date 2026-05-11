@@ -3,6 +3,32 @@
 @section('content_header')
 <h1></h1>
 @endsection
+@section('css')
+<style>
+   .dashboard-chart-card .chart-box {
+      position: relative;
+      height: 320px;
+   }
+
+   .dashboard-chart-card .chart-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+   }
+
+   .dashboard-chart-card .chart-subtitle {
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+   }
+
+   @media (max-width: 767.98px) {
+      .dashboard-chart-card .chart-box {
+         height: 260px;
+      }
+   }
+</style>
+@endsection
 @section('content')
 <div class="row">
    <div class="col-lg-3 col-6">
@@ -15,7 +41,7 @@
          <div class="icon">
             <i class="fas fa-shopping-basket"></i>
          </div>
-         <a href="#" class="small-box-footer">Mais informações <i class="fas fa-arrow-circle-right"></i></a>
+         <a href="{{ route('cestas.index') }}" class="small-box-footer">Mais informações <i class="fas fa-arrow-circle-right"></i></a>
       </div>
    </div>
    <!-- ./col -->
@@ -69,17 +95,25 @@
    </div>
    <!-- ./col -->
 </div>
-<div class="card">
+<div class="card dashboard-chart-card">
    <div class="card-header">
-      <h3 class="card-title">Atividades Recentes</h3>
+      <h3 class="card-title">Visão de Entregas</h3>
    </div>
    <div class="card-body">
       <div class="row">
          <div class="col-md-6">
-            <canvas id="navegadoresChart"></canvas>
+            <div class="chart-title">Evolução mensal</div>
+            <div class="chart-subtitle">Últimos 12 meses de cestas entregues.</div>
+            <div class="chart-box">
+               <canvas id="navegadoresChart"></canvas>
+            </div>
          </div>
          <div class="col-md-6">
-            <canvas id="navegadoresChart2"></canvas>
+            <div class="chart-title">Origem das entregas</div>
+            <div class="chart-subtitle">Distribuição por ponto de origem registrado.</div>
+            <div class="chart-box">
+               <canvas id="navegadoresChart2"></canvas>
+            </div>
          </div>
       </div>
    </div>
@@ -88,60 +122,108 @@
 
 @section('js')
 <script>
-   const anosCesta = JSON.parse('{!! json_encode($anosCesta) !!}');
-   const cestas = JSON.parse('{!! json_encode($cestasEntreguesPorAno) !!}');
+   const chartLabels = @json($chartLabels);
+   const chartDeliveries = @json($chartDeliveries);
+   const chartOriginLabels = @json($chartOriginLabels);
+   const chartOriginTotals = @json($chartOriginTotals);
+
+   Chart.defaults.global.defaultFontFamily = "'Nunito', 'Segoe UI', sans-serif";
+   Chart.defaults.global.defaultFontColor = '#6c757d';
+   Chart.defaults.global.elements.line.borderJoinStyle = 'round';
+   Chart.defaults.global.elements.line.borderCapStyle = 'round';
+
+   const brandColors = ['#28a745', '#dc3545', '#fd7e14', '#007bff', '#6610f2', '#17a2b8'];
+   const pieColors = (chartOriginLabels.length ? chartOriginLabels : ['Sem dados']).map(function(_, index) {
+      return brandColors[index % brandColors.length];
+   });
+
    const ctx = document.getElementById('navegadoresChart').getContext('2d');
+   const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+   gradient.addColorStop(0, 'rgba(40, 167, 69, 0.30)');
+   gradient.addColorStop(1, 'rgba(40, 167, 69, 0.02)');
+
    new Chart(ctx, {
       type: 'line',
       data: {
-         labels: anosCesta,
+         labels: chartLabels,
          datasets: [{
             label: 'Cestas Entregues',
-            data: cestas,
-            borderColor: [
-               '#28a745 ',
-            ],
-            fill: false,
-            tension: 0.1
+            data: chartDeliveries,
+            borderColor: '#28a745',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#28a745',
+            pointBorderWidth: 2,
+            lineTension: 0.35,
+            fill: true
          }]
       },
       options: {
          responsive: true,
-         plugins: {
-            legend: {
-               position: 'bottom'
-            }
-         }
-      },
-      scales: {
-         y: {
-            beginAtZero: true,
-            ticks: {
-               precision: 0,
-            }
+         maintainAspectRatio: false,
+         legend: {
+            display: false
+         },
+         tooltips: {
+            backgroundColor: '#343a40',
+            titleFontColor: '#ffffff',
+            bodyFontColor: '#ffffff',
+            displayColors: false
+         },
+         scales: {
+            yAxes: [{
+               ticks: {
+                  beginAtZero: true,
+                  precision: 0,
+                  padding: 10
+               },
+               gridLines: {
+                  color: 'rgba(0, 0, 0, 0.06)',
+                  drawBorder: false
+               }
+            }],
+            xAxes: [{
+               gridLines: {
+                  display: false
+               },
+               ticks: {
+                  padding: 8
+               }
+            }]
          }
       }
    });
 
    const ctx2 = document.getElementById('navegadoresChart2').getContext('2d');
    new Chart(ctx2, {
-      type: 'bar',
+      type: 'doughnut',
       data: {
-         labels: ['IFES', 'Própria'],
+         labels: chartOriginLabels.length ? chartOriginLabels : ['Sem dados'],
          datasets: [{
-            data: [60, 25, 15],
-            backgroundColor: [
-               '#28a745',
-               '#dc3545',
-            ]
+            data: chartOriginTotals.length ? chartOriginTotals : [1],
+            backgroundColor: pieColors,
+            borderWidth: 0,
+            hoverBorderWidth: 0
          }]
       },
       options: {
          responsive: true,
-         plugins: {
-            legend: {
-               position: 'bottom'
+         maintainAspectRatio: false,
+         cutoutPercentage: 58,
+         legend: {
+            position: 'bottom',
+            labels: {
+               boxWidth: 12,
+               padding: 18
             }
+         },
+         tooltips: {
+            backgroundColor: '#343a40',
+            titleFontColor: '#ffffff',
+            bodyFontColor: '#ffffff'
          }
       }
    });

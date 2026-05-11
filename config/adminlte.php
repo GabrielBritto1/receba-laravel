@@ -355,6 +355,11 @@ return [
                'url'  => 'solicitacoes/gerenciar_itens',
                'icon' => 'fas fa-circle',
             ],
+            [
+               'text' => 'CATÁLOGO DE ITENS',
+               'url'  => 'itens/catalogo',
+               'icon' => 'fas fa-boxes',
+            ],
          ]
       ],
       [

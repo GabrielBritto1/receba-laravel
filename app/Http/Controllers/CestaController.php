@@ -72,9 +72,9 @@ class CestaController extends Controller
             ->paginate(15);
          $familias = Familia::all();
       } else {
-         $cestasNaoSairam = collect();
-         $cestasEmRota = collect();
-         $cestasEntregue = collect();
+         $cestasNaoSairam = Cesta::whereRaw('1 = 0')->paginate(15);
+         $cestasEmRota = Cesta::whereRaw('1 = 0')->paginate(15);
+         $cestasEntregue = Cesta::whereRaw('1 = 0')->paginate(15);
          $familias = collect();
          if ($parceiro) {
             $cestasNaoSairam = Cesta::latest()

@@ -8,63 +8,34 @@
    <div class="card-header">
       <span class="text-muted text-uppercase">Solicitações</span>
       <div class="card-tools">
-         <a href="#" class="btn btn-success btn-sm text-bold">
+         @if($parceiro)
+         <a href="#" class="btn btn-success btn-sm text-bold" data-toggle="modal" data-target="#modalCadastrarItem">
             <i class="fas fa-plus"></i> Solicitar Itens ao IFES
          </a>
+         @else
+         <button class="btn btn-secondary btn-sm text-bold" disabled title="Você não está vinculado a nenhum parceiro">
+            <i class="fas fa-plus"></i> Solicitar Itens ao IFES
+         </button>
+         @endif
       </div>
    </div>
    <div class="card-body pt-1">
       <div class="row">
          <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
+            <table class="table table-hover text-nowrap">
                <thead>
                   <tr>
                      <th>Data da Reserva</th>
+                     <th>Parceiro</th>
+                     <th>Item</th>
                      <th>Quantidade Total</th>
                      <th>Quantidade Aceita</th>
-                     <th>Em Posse</th>
                      <th>Status</th>
                   </tr>
                </thead>
-               <tbody>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">Parceiro</td>
-                     <td class="align-middle">
-                        <span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">Pendente</span>
-                     </td>
-                  </tr>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">IFES</td>
-                     <td class="align-middle">
-                        <span class="badge badge-info text-uppercase">Aceita</span>
-                     </td>
-                  </tr>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">IFES</td>
-                     <td class="align-middle">
-                        <span class="badge badge-warning text-uppercase text-white">Montada</span>
-                     </td>
-                  </tr>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">Parceiro</td>
-                     <td class="align-middle">
-                        <span class="badge badge-success text-uppercase">Entregue</span>
-                     </td>
-                  </tr>
-               </tbody>
+               <tbody id="listItens"></tbody>
             </table>
+            <div id="paginationLinksItensPrincipal" class="mt-2 text-center"></div>
          </div>
       </div>
    </div>
@@ -77,30 +48,39 @@
    <div class="card-body pt-1">
       <div class="row">
          <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap table-striped">
+            <table class="table table-hover text-nowrap">
                <thead>
                   <tr>
                      <th>Data da Reserva</th>
+                     <th>Parceiro</th>
+                     <th>Item</th>
                      <th>Quantidade Total</th>
-                     <th>Quantidade Aceita</th>
-                     <th>Em Posse</th>
+                     <th>Quantidade Não Aceita</th>
                      <th>Status</th>
                   </tr>
                </thead>
-               <tbody>
-                  <tr>
-                     <td class="align-middle">10/10/2021</td>
-                     <td class="align-middle">10</td>
-                     <td class="align-middle">8</td>
-                     <td class="align-middle text-bold">IFES</td>
-                     <td class="align-middle">
-                        <span class="badge badge-danger text-uppercase">Não Aceita</span>
-                     </td>
-                  </tr>
-               </tbody>
+               <tbody id="listItensNaoAceitos"></tbody>
             </table>
+            <div id="paginationLinksItensSecundario" class="mt-2 text-center"></div>
          </div>
       </div>
    </div>
 </div>
+
+@include('components.modals.itens-modal')
 @stop
+
+@section('js')
+<script src="/assets/js/itens.js"></script>
+<script src="/assets/js/pagination.js"></script>
+
+@if (session('success'))
+<script>
+   Swal.fire({
+      icon: 'success',
+      title: 'Sucesso',
+      text: "{{ session('success') }}",
+   });
+</script>
+@endif
+@endsection

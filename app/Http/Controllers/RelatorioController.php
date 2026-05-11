@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cesta;
+use App\Models\Familia;
 use App\Models\Parceiro;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -175,5 +176,114 @@ class RelatorioController extends Controller
       // 4. Executa a consulta e ordena pelo nome
       $parceiros = $query->orderBy('name', 'asc')->get();
       return view('relatorios.relatorios_visuais_telas.relatorio_parceiro', compact('parceiros'));
+   }
+
+   public function RelatorioFamilia(Request $request)
+   {
+      $user = Auth::user();
+      $query = Familia::with(['representante', 'parceiro.sigla']);
+
+      if ($request->filled('nome_representante')) {
+         $query->whereHas('representante', function ($representanteQuery) use ($request) {
+            $representanteQuery->where('nome', 'like', '%' . $request->nome_representante . '%');
+         });
+      }
+
+      $statusFamilia = $request->input('status_familia', 'todos');
+
+      if ($statusFamilia === 'ativa') {
+         $query->where('status', 1);
+      } elseif ($statusFamilia === 'inativa') {
+         $query->where('status', 0);
+      }
+
+      if ($user->can('Administrador')) {
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
+         }
+         $parceiros = Parceiro::orderBy('name')->get();
+      } else {
+         $parceiroDoUsuario = $user->parceiros->first();
+
+         if ($parceiroDoUsuario) {
+            $query->where('parceiro_id', $parceiroDoUsuario->id);
+            $parceiros = collect([$parceiroDoUsuario]);
+         } else {
+            $query->whereRaw('1 = 0');
+            $parceiros = collect();
+         }
+      }
+
+      $familias = $query
+         ->get()
+         ->sortBy(function ($familia) {
+            return optional($familia->representante)->nome;
+         })
+         ->values();
+
+      return view('relatorios.relatorios_visuais_telas.relatorio_familia', compact('familias', 'parceiros'));
+   }
+
+   public function RelatorioSaidaDeCestaPorParceiro(Request $request)
+   {
+      $anosDisponiveis = Cesta::selectRaw('YEAR(data_entrega) as ano')
+         ->whereNotNull('data_entrega')
+         ->distinct()
+         ->orderBy('ano', 'desc')
+         ->pluck('ano');
+
+      $query = Cesta::with(['parceiro.sigla'])
+         ->whereNotNull('data_entrega')
+         ->where('status', 'Entregue');
+
+      if ($request->filled('ano_selecionado') && $request->ano_selecionado != 'periodo_atual') {
+         $ano = $request->ano_selecionado;
+         $query->whereYear('data_entrega', $ano);
+         $meses = CarbonPeriod::create(Carbon::create($ano, 1, 1), '1 month', Carbon::create($ano, 12, 1));
+      } else {
+         $inicioPeriodo = Carbon::now()->subMonths(11)->startOfMonth();
+         $fimPeriodo = Carbon::now()->endOfMonth();
+         $query->whereBetween('data_entrega', [$inicioPeriodo, $fimPeriodo]);
+         $meses = CarbonPeriod::create($inicioPeriodo, '1 month', $fimPeriodo);
+      }
+
+      $user = Auth::user();
+
+      if ($user->can('Administrador')) {
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
+         }
+         $parceiros = Parceiro::with('sigla')->orderBy('name')->get();
+      } else {
+         $parceiroDoUsuario = $user->parceiros->first();
+
+         if ($parceiroDoUsuario) {
+            $query->where('parceiro_id', $parceiroDoUsuario->id);
+            $parceiros = collect([$parceiroDoUsuario->load('sigla')]);
+         } else {
+            $query->whereRaw('1 = 0');
+            $parceiros = collect();
+         }
+      }
+
+      if ($request->filled('ponto_origem')) {
+         $query->where('ponto_origem', $request->ponto_origem);
+      }
+
+      $entregas = $query->get();
+      $entregasAgrupadas = $entregas->groupBy('parceiro_id');
+      $pontosOrigem = Cesta::select('ponto_origem')
+         ->whereNotNull('ponto_origem')
+         ->distinct()
+         ->orderBy('ponto_origem')
+         ->pluck('ponto_origem');
+
+      return view('relatorios.relatorios_visuais_telas.relatorio_saida_de_cesta_por_parceiro', [
+         'entregasAgrupadas' => $entregasAgrupadas,
+         'meses' => $meses,
+         'parceiros' => $parceiros,
+         'anosDisponiveis' => $anosDisponiveis,
+         'pontosOrigem' => $pontosOrigem,
+      ]);
    }
 }

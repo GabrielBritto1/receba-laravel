@@ -9,6 +9,10 @@
    <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
+      @page {
+         margin: 28px 24px 18px 24px;
+      }
+
       body {
          margin: 0;
          padding: 0;
@@ -28,19 +32,41 @@
       .header-text {
          text-align: center;
          font-size: 15px;
+         width: 100%;
       }
 
       thead {
          background-color: #f2f2f2;
+         display: table-header-group;
       }
 
       tbody td {
          text-align: center;
       }
+
+      table {
+         margin-bottom: 12px;
+      }
+
+      tr {
+         page-break-inside: avoid;
+      }
+
+      .watermark {
+         position: fixed;
+         top: 34%;
+         left: 50%;
+         width: 260px;
+         transform: translate(-50%, -50%);
+         opacity: 0.08;
+         z-index: -1;
+      }
    </style>
 </head>
 
 <body>
+   <img class="watermark" src="{{ public_path('assets/img/banner_vertical_pdf.png') }}" alt="">
+
    <div class="header">
       <img src="{{ public_path('assets/img/banner_vertical_pdf.png') }}" width="100px" alt="">
       <div class="header-text">
@@ -52,30 +78,52 @@
    </div>
 
    <div class="content">
+      @forelse($entregas as $entregasChunk)
       <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
          <thead>
             <tr>
-               <th>Data</th>
                <th>Família</th>
-               <th>Quantidade de Cestas</th>
-               <th>Responsável pela Entrega</th>
+               <th>Parceiro</th>
+               <th>Origem</th>
+               <th>Data de Saída</th>
+               <th>Data de Entrega</th>
+               <th>Data de Saída IFES</th>
             </tr>
          </thead>
          <tbody>
-            <td>
-               <strong>Nenhum registro encontrado.</strong>
-            </td>
-            <td>
-               <strong>Nenhum registro encontrado.</strong>
-            </td>
-            <td>
-               <strong>Nenhum registro encontrado.</strong>
-            </td>
-            <td>
-               <strong>Nenhum registro encontrado.</strong>
-            </td>
+            @foreach($entregasChunk as $entrega)
+            <tr>
+               <td>{{ $entrega['representante_nome'] }}</td>
+               <td>{{ $entrega['parceiro_nome'] }}</td>
+               <td>{{ $entrega['origem'] }}</td>
+               <td>{{ $entrega['data_saida'] }}</td>
+               <td>{{ $entrega['data_entrega'] }}</td>
+               <td>{{ $entrega['data_saida_ifes'] }}</td>
+            </tr>
+            @endforeach
          </tbody>
       </table>
+      @empty
+      <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+         <thead>
+            <tr>
+               <th>Família</th>
+               <th>Parceiro</th>
+               <th>Origem</th>
+               <th>Data de Saída</th>
+               <th>Data de Entrega</th>
+               <th>Data de Saída IFES</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td colspan="6">
+                  <strong>Nenhum registro encontrado.</strong>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+      @endforelse
    </div>
 </body>
 

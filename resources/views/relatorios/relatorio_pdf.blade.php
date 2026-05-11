@@ -38,27 +38,27 @@
          <div class="clearfix hidden-md-up"></div>
 
          <div class="col col-sm col-md">
-            <div class="info-box mb-3">
-               <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-friends"></i></span>
+            <a href="{{ route('relatorios_pdf.relatorio_familia_pdf') }}">
+               <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-friends"></i></span>
 
-               <div class="info-box-content">
-                  <span class="info-box-text text-bold">Relatório de Famílias</span>
+                  <div class="info-box-content">
+                     <span class="info-box-text text-bold text-dark">Relatório de Famílias</span>
+                  </div>
                </div>
-               <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
+            </a>
          </div>
          <!-- /.col -->
          <div class="col col-sm col-md">
-            <div class="info-box mb-3">
-               <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-basket"></i></span>
+            <a href="{{ route('relatorios_pdf.relatorio_saida_de_cesta_por_parceiro_pdf') }}">
+               <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-basket"></i></span>
 
-               <div class="info-box-content">
-                  <span class="info-box-text text-bold">Relatório de Saída de Cesta por Parceiro</span>
+                  <div class="info-box-content">
+                     <span class="info-box-text text-bold text-dark">Relatório de Saída de Cesta por Parceiro</span>
+                  </div>
                </div>
-               <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
+            </a>
          </div>
          <!-- /.col -->
          <div class="col col-sm col-md">
