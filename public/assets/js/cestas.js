@@ -7,7 +7,7 @@ function cestasNaoSairam(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasNaoSairam`).html(tableLoad);
 
-   $.get(`/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasNaoSairam").html('');
          let cestasNaoSairam = data.cestasNaoSairam;
@@ -27,7 +27,7 @@ function cestasNaoSairam(page = 1) {
                         <span class="badge badge-danger text-uppercase">${item.status}</span>
                      </td>
                      <td class="align-middle">
-                        <a href="/cestas/entrega_familia/${item.id}" class="btn btn-warning btn-sm text-white">
+                        <a href="${window.APP_URL}/cestas/entrega_familia/${item.id}" class="btn btn-warning btn-sm text-white">
                            <i class="fas fa-shipping-fast"></i>
                         </a>
                      </td>
@@ -57,7 +57,7 @@ function cestasEmRota(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasEmRota`).html(tableLoad);
 
-   $.get(`/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasEmRota").html('');
          let cestasEmRota = data.cestasEmRota;
@@ -113,7 +113,7 @@ function cestasEntregue(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasEntregue`).html(tableLoad);
 
-   $.get(`/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasEntregue").html('');
          let cestasEntregue = data.cestasEntregue;
