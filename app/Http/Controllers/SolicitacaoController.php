@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cesta;
+use App\Models\Parceiro;
 use App\Models\Solicitacao;
 use Illuminate\Http\Request;
 use App\Support\ActivityLogger;
@@ -35,28 +36,39 @@ class SolicitacaoController extends Controller
                ->paginate(15);
          }
       }
-      return view('solicitacoes.index', compact('solicitacoes', 'parceiro', 'solicitacoesNaoAceitas'));
+      $parceiros = Parceiro::orderBy('name')->get();
+      return view('solicitacoes.index', compact('solicitacoes', 'parceiro', 'solicitacoesNaoAceitas', 'parceiros'));
    }
 
-   public function list()
+   public function list(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
+
+      $query = Solicitacao::cestas()->with('parceiro.sigla')
+         ->where('quantidade_aceita', '>', 0)
+         ->orderBy('created_at', 'desc');
+
       if ($user->hasRole('Administrador')) {
-         $solicitacoes = Solicitacao::cestas()->with('parceiro.sigla')
-            ->where('quantidade_aceita', '>', 0)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-      } else {
-         $solicitacoes = Solicitacao::cestas()->whereRaw('1 = 0')->paginate(15);
-         if ($parceiro) {
-            $solicitacoes = Solicitacao::cestas()->with('parceiro.sigla')
-               ->where('parceiro_id', $parceiro->id)
-               ->where('quantidade_aceita', '>', 0)
-               ->orderBy('created_at', 'desc')
-               ->paginate(15);
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
          }
+      } else {
+         $query->where('parceiro_id', $parceiro?->id ?? 0);
       }
+
+      if ($request->filled('status')) {
+         $query->where('status', $request->status);
+      }
+      if ($request->filled('data_inicio')) {
+         $query->whereDate('created_at', '>=', $request->data_inicio);
+      }
+      if ($request->filled('data_fim')) {
+         $query->whereDate('created_at', '<=', $request->data_fim);
+      }
+
+      $solicitacoes = $query->paginate(15);
+
       return response()->json([
          'status' => 'success',
          'solicitacoes' => $solicitacoes->items(),
@@ -67,23 +79,32 @@ class SolicitacaoController extends Controller
       ]);
    }
 
-   public function listNaoAceitas()
+   public function listNaoAceitas(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
+
+      $query = Solicitacao::cestas()->with('parceiro.sigla')
+         ->where('quantidade_nao_aceita', '>', 0)
+         ->orderBy('created_at', 'desc');
+
       if ($user->hasRole('Administrador')) {
-         $solicitacoesNaoAceitas = Solicitacao::cestas()->with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-      } else {
-         $solicitacoesNaoAceitas = Solicitacao::cestas()->whereRaw('1 = 0')->paginate(15);
-         if ($parceiro) {
-            $solicitacoesNaoAceitas = Solicitacao::cestas()->with('parceiro.sigla')->where('quantidade_nao_aceita', '>', 0)
-               ->where('parceiro_id', $parceiro->id)
-               ->orderBy('created_at', 'desc')
-               ->paginate(15);
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
          }
+      } else {
+         $query->where('parceiro_id', $parceiro?->id ?? 0);
       }
+
+      if ($request->filled('data_inicio')) {
+         $query->whereDate('created_at', '>=', $request->data_inicio);
+      }
+      if ($request->filled('data_fim')) {
+         $query->whereDate('created_at', '<=', $request->data_fim);
+      }
+
+      $solicitacoesNaoAceitas = $query->paginate(15);
+
       return response()->json([
          'status' => 'success',
          'solicitacoesNaoAceitas' => $solicitacoesNaoAceitas->items(),

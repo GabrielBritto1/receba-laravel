@@ -82,11 +82,11 @@
             @php
             // Pegamos os dados da primeira entrega para informações da linha (nome, parceiro)
             $primeiraEntrega = $entregas->first();
-            $representante = $primeiraEntrega->familia->representante;
+            $representante = optional($primeiraEntrega->familia)->representante;
             $parceiro = $primeiraEntrega->parceiro;
             @endphp
             <tr>
-               <td class="text-left align-middle">{{ $representante->nome }}</td>
+               <td class="text-left align-middle">{{ $representante->nome ?? '-' }}</td>
                <td class="text-left align-middle">
                   <span class="badge p-2" style="background-color: {{ $parceiro->sigla->color ?? '#6c757d' }}; color: #fff;">
                      {{ $parceiro->sigla->name ?? $parceiro->name }}

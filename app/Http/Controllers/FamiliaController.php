@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreFamiliaRequest;
 use App\Models\Endereco;
 use App\Models\Familia;
+use App\Models\Parceiro;
 use App\Models\Pessoa;
 use App\Models\Representante;
 use Illuminate\Http\Request;
@@ -22,31 +23,37 @@ class FamiliaController extends Controller
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
-      return view('familias.index', compact('parceiro'));
+      $parceiros = Parceiro::orderBy('name')->get();
+      return view('familias.index', compact('parceiro', 'parceiros'));
    }
 
-   public function list()
+   public function list(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
+      $query = Familia::select('familias.*')
+         ->join('representantes', 'familias.id', '=', 'representantes.id')
+         ->with(['representante', 'parceiro.sigla'])
+         ->orderBy('representantes.nome');
+
       if ($user->hasRole('Administrador')) {
-         $familias = Familia::select('familias.*')
-            ->join('representantes', 'familias.id', '=', 'representantes.id')
-            ->with(['representante', 'parceiro.sigla'])
-            ->orderBy('nome')
-            ->paginate(20);
-      } else {
-         $familias = collect();
-         if ($parceiro) {
-            $familias = Familia::select('familias.*')
-               ->join('representantes', 'familias.id', '=', 'representantes.id')
-               ->with(['representante', 'parceiro.sigla'])
-               ->where('parceiro_id', $parceiro->id)
-               ->orderBy('nome')
-               ->paginate(20);
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
          }
+      } else {
+         $query->where('parceiro_id', $parceiro?->id ?? 0);
       }
+
+      if ($request->filled('nome_representante')) {
+         $query->where('representantes.nome', 'like', '%' . $request->nome_representante . '%');
+      }
+      if ($request->filled('status') && $request->status !== '') {
+         $query->where('familias.status', $request->status);
+      }
+
+      $familias = $query->paginate(20);
+
       return response()->json([
          'status' => 'success',
          'familias' => $familias->items(),

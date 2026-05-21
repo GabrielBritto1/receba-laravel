@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Parceiro;
 use App\Models\Solicitacao;
 use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
@@ -39,8 +40,9 @@ class ItemController extends Controller
       }
 
       $itensDisponiveis = Item::where('disponivel', true)->orderBy('nome')->get();
+      $parceiros = Parceiro::orderBy('name')->get();
 
-      return view('itens.index', compact('solicitacoes', 'solicitacoesNaoAceitas', 'parceiro', 'itensDisponiveis'));
+      return view('itens.index', compact('solicitacoes', 'solicitacoesNaoAceitas', 'parceiro', 'itensDisponiveis', 'parceiros'));
    }
 
    public function store(Request $request)
@@ -73,26 +75,37 @@ class ItemController extends Controller
       return redirect()->route('itens.index')->with('success', 'Item solicitado com sucesso, aguarde a aprovação!');
    }
 
-   public function list()
+   public function list(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
+      $query = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
+         ->where('quantidade_aceita', '>', 0)
+         ->orderBy('created_at', 'desc');
+
       if ($user->hasRole('Administrador')) {
-         $solicitacoes = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
-            ->where('quantidade_aceita', '>', 0)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-      } else {
-         $solicitacoes = Solicitacao::itens()->whereRaw('1 = 0')->paginate(15);
-         if ($parceiro) {
-            $solicitacoes = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
-               ->where('parceiro_id', $parceiro->id)
-               ->where('quantidade_aceita', '>', 0)
-               ->orderBy('created_at', 'desc')
-               ->paginate(15);
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
          }
+      } else {
+         $query->where('parceiro_id', $parceiro?->id ?? 0);
       }
+
+      if ($request->filled('item_id')) {
+         $query->where('item_id', $request->item_id);
+      }
+      if ($request->filled('status')) {
+         $query->where('status', $request->status);
+      }
+      if ($request->filled('data_inicio')) {
+         $query->whereDate('created_at', '>=', $request->data_inicio);
+      }
+      if ($request->filled('data_fim')) {
+         $query->whereDate('created_at', '<=', $request->data_fim);
+      }
+
+      $solicitacoes = $query->paginate(15);
 
       return response()->json([
          'status' => 'success',
@@ -104,26 +117,34 @@ class ItemController extends Controller
       ]);
    }
 
-   public function listNaoAceitas()
+   public function listNaoAceitas(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
+      $query = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
+         ->where('quantidade_nao_aceita', '>', 0)
+         ->orderBy('created_at', 'desc');
+
       if ($user->hasRole('Administrador')) {
-         $solicitacoesNaoAceitas = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
-            ->where('quantidade_nao_aceita', '>', 0)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-      } else {
-         $solicitacoesNaoAceitas = Solicitacao::itens()->whereRaw('1 = 0')->paginate(15);
-         if ($parceiro) {
-            $solicitacoesNaoAceitas = Solicitacao::itens()->with(['parceiro.sigla', 'item'])
-               ->where('quantidade_nao_aceita', '>', 0)
-               ->where('parceiro_id', $parceiro->id)
-               ->orderBy('created_at', 'desc')
-               ->paginate(15);
+         if ($request->filled('parceiro_id')) {
+            $query->where('parceiro_id', $request->parceiro_id);
          }
+      } else {
+         $query->where('parceiro_id', $parceiro?->id ?? 0);
       }
+
+      if ($request->filled('item_id')) {
+         $query->where('item_id', $request->item_id);
+      }
+      if ($request->filled('data_inicio')) {
+         $query->whereDate('created_at', '>=', $request->data_inicio);
+      }
+      if ($request->filled('data_fim')) {
+         $query->whereDate('created_at', '<=', $request->data_fim);
+      }
+
+      $solicitacoesNaoAceitas = $query->paginate(15);
 
       return response()->json([
          'status' => 'success',

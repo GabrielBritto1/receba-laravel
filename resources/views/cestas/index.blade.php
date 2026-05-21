@@ -4,6 +4,36 @@
 <h1 class="text-bold"><i class="fas fa-calendar-plus"></i> Registrar Entrega</h1>
 @stop
 @section('content')
+@can('Administrador')
+<div class="card">
+   <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-filter mr-1"></i> Filtros</h3>
+   </div>
+   <div class="card-body">
+      <div class="row">
+         <div class="col-md-5">
+            <div class="form-group">
+               <label>Parceiro:</label>
+               <select id="filtro-parceiro-cesta" class="form-control form-control-sm">
+                  <option value="">Todos</option>
+                  @foreach($parceiros as $p)
+                  <option value="{{ $p->id }}">{{ $p->name }}</option>
+                  @endforeach
+               </select>
+            </div>
+         </div>
+         <div class="col-md-2 d-flex align-items-end">
+            <div class="form-group w-100">
+               <button id="btn-filtrar-cesta" class="btn btn-success btn-sm btn-block">
+                  <i class="fas fa-search"></i> Filtrar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+@endcan
+
 <section class="cestas_que_nao_sairam">
    <div class="card">
       <div class="card-header">

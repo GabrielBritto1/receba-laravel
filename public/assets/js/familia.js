@@ -12,13 +12,28 @@ function showError(message) {
 
 loadPrincipal();
 
+$('#btn-filtrar').on('click', function () {
+   loadPrincipal(1);
+});
+
+function getFamiliaFilters() {
+   const params = new URLSearchParams();
+   const nome = $('#filtro-nome').val();
+   const status = $('#filtro-status').val();
+   const parceiro = $('#filtro-parceiro').val();
+   if (nome) params.append('nome_representante', nome);
+   if (status !== '') params.append('status', status);
+   if (parceiro) params.append('parceiro_id', parceiro);
+   return params.toString() ? '&' + params.toString() : '';
+}
+
 function loadPrincipal(page = 1) {
    let tabela = $('#list').closest('table');
    let numColunas = tabela.find('thead tr th').length;
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#list`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/familias/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/familias/list?page=${page}${getFamiliaFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#list").html('');
          let familias = data.familias;

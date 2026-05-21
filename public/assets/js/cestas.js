@@ -1,13 +1,26 @@
 cestasNaoSairam();
 cestasEmRota();
 cestasEntregue();
+
+$('#btn-filtrar-cesta').on('click', function () {
+   cestasNaoSairam(1);
+   cestasEmRota(1);
+   cestasEntregue(1);
+});
+
+function getCestaFilters() {
+   const params = new URLSearchParams();
+   const parceiro = $('#filtro-parceiro-cesta').val();
+   if (parceiro) params.append('parceiro_id', parceiro);
+   return params.toString() ? '&' + params.toString() : '';
+}
 function cestasNaoSairam(page = 1) {
    let tabela = $('#listCestasNaoSairam').closest('table');
    let numColunas = tabela.find('thead tr th').length;
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasNaoSairam`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}${getCestaFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasNaoSairam").html('');
          let cestasNaoSairam = data.cestasNaoSairam;
@@ -57,7 +70,7 @@ function cestasEmRota(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasEmRota`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}${getCestaFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasEmRota").html('');
          let cestasEmRota = data.cestasEmRota;
@@ -113,7 +126,7 @@ function cestasEntregue(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listCestasEntregue`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/cestas/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/cestas/list?page=${page}${getCestaFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#listCestasEntregue").html('');
          let cestasEntregue = data.cestasEntregue;
