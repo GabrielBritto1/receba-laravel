@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -37,6 +38,7 @@ class RolePermissionController extends Controller
          }
       }
 
+      ActivityLogger::log('atualizado', 'Permissões de papéis atualizadas');
       return redirect()
          ->route('roles.permissions.index')
          ->with('success', 'Permissões atualizadas com sucesso!');

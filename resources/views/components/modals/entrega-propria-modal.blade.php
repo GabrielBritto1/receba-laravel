@@ -17,7 +17,7 @@
                         <select name="familia_id" id="familia_id" class="form-control">
                            <option selected disabled value="">Selecione uma Família</option>
                            @forelse($familias as $familia)
-                           <option value="{{ $familia->id }}">{{ $familia->representante->nome }}</option>
+                           <option value="{{ $familia->id }}">{{ $familia->representante->nome ?? '' }}</option>
                            @empty
                            <option value="">Nenhuma Família cadastrada</option>
                            @endforelse

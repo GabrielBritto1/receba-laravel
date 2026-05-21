@@ -348,12 +348,12 @@ return [
             [
                'text' => 'GERENCIAR CESTAS',
                'url'  => 'solicitacoes/gerenciar_solicitacoes',
-               'icon' => 'fas fa-circle',
+               'icon' => 'fas fa-clipboard-list',
             ],
             [
                'text' => 'GERENCIAR ITENS',
                'url'  => 'solicitacoes/gerenciar_itens',
-               'icon' => 'fas fa-circle',
+               'icon' => 'fas fa-clipboard-list',
             ],
             [
                'text' => 'CATÁLOGO DE ITENS',

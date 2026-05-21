@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cesta;
 use App\Models\Solicitacao;
 use Illuminate\Http\Request;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\Auth;
 
 class SolicitacaoController extends Controller
@@ -125,6 +126,7 @@ class SolicitacaoController extends Controller
          'parceiro_id' => $parceiroId,
       ]);
 
+      ActivityLogger::log('solicitado', "Solicitação de cesta criada (quantidade: {$solicitacao->quantidade_solicitada})");
       return redirect()->route('solicitacoes.index')->with('success', 'Cesta solicitada com sucesso, aguarde a aprovação!');
    }
 
@@ -218,6 +220,7 @@ class SolicitacaoController extends Controller
 
       $solicitacao->save();
 
+      ActivityLogger::log('atualizado', "Status da solicitação de cesta #{\->id} atualizado para: {\->status}");
       return redirect()->route('solicitacoes.gerenciar_solicitacoes')->with('success', 'Status da cesta atualizado com sucesso!');
    }
 }

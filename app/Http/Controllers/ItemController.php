@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Solicitacao;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,6 +68,8 @@ class ItemController extends Controller
          'parceiro_id' => $parceiroId,
       ]);
 
+      $itemNome = Item::find($validated['item_id'])?->nome ?? 'desconhecido';
+      ActivityLogger::log('solicitado', "Item solicitado: {$itemNome} (qtd: {$validated['quantidade_solicitada']})");
       return redirect()->route('itens.index')->with('success', 'Item solicitado com sucesso, aguarde a aprovação!');
    }
 
@@ -158,6 +161,7 @@ class ItemController extends Controller
          'disponivel' => $request->boolean('disponivel'),
       ]);
 
+      ActivityLogger::log('criado', "Item adicionado ao catálogo: {$validated['nome']}");
       return redirect()->route('itens.catalogo')->with('success', 'Item cadastrado com sucesso!');
    }
 
@@ -168,6 +172,8 @@ class ItemController extends Controller
       $item->disponivel = !$item->disponivel;
       $item->save();
 
+      $status = $item->disponivel ? 'ativado' : 'desativado';
+      ActivityLogger::log('atualizado', "Item {$status} no catálogo: {$item->nome}");
       return redirect()->route('itens.catalogo')->with('success', 'Disponibilidade atualizada!');
    }
 
@@ -177,6 +183,7 @@ class ItemController extends Controller
 
       $item->delete();
 
+      ActivityLogger::log('removido', "Item removido do catálogo: {$item->nome}");
       return redirect()->route('itens.catalogo')->with('success', 'Item removido com sucesso!');
    }
 
