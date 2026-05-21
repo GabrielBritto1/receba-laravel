@@ -46,7 +46,7 @@ function loadItensPrincipal(page = 1) {
    const tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $('#listItens').html(tableLoad);
 
-   $.get(`${window.location.origin}/itens/list?page=${page}`, function (data) {
+   $.get(`/itens/list?page=${page}`, function (data) {
       if (data.status === 'success') {
          $('#listItens').html('');
          const solicitacoes = data.solicitacoes;
@@ -88,7 +88,7 @@ function loadItensSecundario(page = 1) {
    const tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $('#listItensNaoAceitos').html(tableLoad);
 
-   $.get(`${window.location.origin}/itens/listNaoAceitas?page=${page}`, function (data) {
+   $.get(`/itens/listNaoAceitas?page=${page}`, function (data) {
       if (data.status === 'success') {
          $('#listItensNaoAceitos').html('');
          const solicitacoesNaoAceitas = data.solicitacoesNaoAceitas;
