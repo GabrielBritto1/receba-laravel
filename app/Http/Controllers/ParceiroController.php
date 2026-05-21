@@ -8,6 +8,7 @@ use App\Models\Parceiro;
 use App\Models\ParceiroSigla;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\Auth;
 
 class ParceiroController extends Controller
@@ -105,6 +106,7 @@ class ParceiroController extends Controller
          $validated['secretario_id']
       ]);
 
+      ActivityLogger::log('criado', "Parceiro criado: {$parceiro->name}");
       return redirect()->route('parceiros.index')->with(['success' => 'Parceiro criado com sucesso!', 'success_action' => 'store']);
    }
 
@@ -172,6 +174,7 @@ class ParceiroController extends Controller
          'cnpj' => 'nullable|string|max:18',
       ]);
       $parceiro->update($validated);
+      ActivityLogger::log('atualizado', "Parceiro atualizado: {$parceiro->name}");
       return redirect()->route('parceiros.index')->with('success', 'Parceiro atualizado com sucesso!');
    }
 
@@ -192,7 +195,8 @@ class ParceiroController extends Controller
       $parceiro = Parceiro::findOrFail($id);
       $parceiro->status = !$parceiro->status;
       $parceiro->save();
-
+      $statusLabel = $parceiro->status ? 'ativado' : 'desativado';
+      ActivityLogger::log('atualizado', "Parceiro {$statusLabel}: {$parceiro->name}");
       return redirect()->route('parceiros.index')->with('success', 'Status atualizado com sucesso!');
    }
 

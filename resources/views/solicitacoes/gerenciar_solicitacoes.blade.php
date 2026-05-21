@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 @section('title', 'Gerenciar Cestas - RECeBa')
 @section('content_header')
-<h1 class="text-bold"><i class="fas fa-circle"></i> Gerenciar Cestas</h1>
+<h1 class="text-bold"><i class="fas fa-clipboard-list"></i> Gerenciar Cestas</h1>
 @stop
 @section('content')
 <section class="solicitacoes_em_analise">

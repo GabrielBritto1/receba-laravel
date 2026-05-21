@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CestaController;
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
    Route::middleware('can:Administrador')->group(function () {
       Route::get('/roles/permissions', [RolePermissionController::class, 'index'])->name('roles.permissions.index');
       Route::post('/roles/permissions', [RolePermissionController::class, 'update'])->name('roles.permissions.update');
+      Route::get('/admin/activity-log', [ActivityLogController::class, 'list'])->name('admin.activity_log.list');
    });
 
    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -16,6 +16,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\Hash;
 
 
