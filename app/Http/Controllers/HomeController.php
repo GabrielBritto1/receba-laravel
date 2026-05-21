@@ -41,13 +41,15 @@ class HomeController extends Controller
 
       $parceiros = Parceiro::count();
 
+      $familiasQuery = Familia::join('representantes', 'familias.id', '=', 'representantes.id');
       if ($user->can('Administrador')) {
-         $familias = Familia::count();
+         // admin ve o total, sem duplicar representantes com mais de uma familia
       } elseif ($parceiro) {
-         $familias = Familia::where('parceiro_id', $parceiro->id)->count();
+         $familiasQuery->where('familias.parceiro_id', $parceiro->id);
       } else {
-         $familias = 0;
+         $familiasQuery->whereRaw('1 = 0');
       }
+      $familias = $familiasQuery->distinct('representantes.cpf')->count('representantes.cpf');
 
       $cestasQuery = Cesta::query()
          ->whereNotNull('data_entrega')
