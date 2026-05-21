@@ -71,8 +71,8 @@
 @stop
 
 @section('js')
-<script src="/assets/js/itens.js"></script>
-<script src="/assets/js/pagination.js"></script>
+<script src="{{ asset('assets/js/itens.js') }}"></script>
+<script src="{{ asset('assets/js/pagination.js') }}"></script>
 
 @if (session('success'))
 <script>
