@@ -40,9 +40,12 @@ class HomeController extends Controller
       }
 
       $parceiros = Parceiro::count();
-      $familias = Familia::join('representantes', 'familias.id', '=', 'representantes.id')->distinct('cpf')->count();
 
-      if (! $user->can('Administrador') && ! $parceiro) {
+      if ($user->can('Administrador')) {
+         $familias = Familia::count();
+      } elseif ($parceiro) {
+         $familias = Familia::where('parceiro_id', $parceiro->id)->count();
+      } else {
          $familias = 0;
       }
 
