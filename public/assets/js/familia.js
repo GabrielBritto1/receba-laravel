@@ -18,7 +18,7 @@ function loadPrincipal(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#list`).html(tableLoad);
 
-   $.get(`/familias/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/familias/list?page=${page}`, function (data) {
       if (data.status == 'success') {
          $("#list").html('');
          let familias = data.familias;
@@ -43,10 +43,10 @@ function loadPrincipal(page = 1) {
                      </td>
                      <td>
                         <div class="btn-group float-right">
-                           <a href="/familias/${item.id}/show" class="btn btn-success btn-sm">
+                           <a href="${window.APP_URL}/familias/${item.id}/show" class="btn btn-success btn-sm">
                               <i class="fas fa-eye"></i>
                            </a>
-                           <a href="/familias/${item.id}/edit" class="btn btn-warning btn-sm text-white">
+                           <a href="${window.APP_URL}/familias/${item.id}/edit" class="btn btn-warning btn-sm text-white">
                               <i class="fas fa-edit"></i>
                            </a>
                            <button type="button" class="btn btn-info btn-sm text-white ativar-btn" data-id="${item.id}">

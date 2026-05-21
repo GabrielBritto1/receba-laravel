@@ -129,6 +129,9 @@
         @endif
     @endif
 
+    {{-- App base URL for JS files --}}
+    <script>window.APP_URL = "{{ url('/') }}";</script>
+
     {{-- Custom Scripts --}}
     <script src="{{ asset('assets/js/number_formarter.js') }}"></script>
     @yield('adminlte_js')

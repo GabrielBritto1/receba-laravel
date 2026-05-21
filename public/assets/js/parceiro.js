@@ -19,7 +19,7 @@ function loadPrincipal(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#list`).html(tableLoad);
 
-   $.get(`/parceiros/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/parceiros/list?page=${page}`, function (data) {
       if (data.status == 'success') {
          $("#list").html('');
          let parceiros = data.data;
@@ -44,10 +44,10 @@ function loadPrincipal(page = 1) {
                      </td>
                      <td>
                         <div class="btn-group float-right">
-                           <a href="/parceiros/${item.id}/show" class="btn btn-sm btn-success btn-md">
+                           <a href="${window.APP_URL}/parceiros/${item.id}/show" class="btn btn-sm btn-success btn-md">
                               <i class="fas fa-eye"></i>
                            </a>
-                           <a href="/parceiros/${item.id}/edit" class="btn btn-sm btn-warning btn-md text-white">
+                           <a href="${window.APP_URL}/parceiros/${item.id}/edit" class="btn btn-sm btn-warning btn-md text-white">
                               <i class="fas fa-edit"></i>
                            </a>
                            <button type="button" class="btn btn-sm btn-secondary btn-md text-white" onClick="storeSecretarioAssociar(${item.id})">
