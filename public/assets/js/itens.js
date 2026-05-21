@@ -9,6 +9,24 @@ function showItemError(message) {
 loadItensPrincipal();
 loadItensSecundario();
 
+$('#btn-filtrar-item').on('click', function () {
+   loadItensPrincipal(1);
+   loadItensSecundario(1);
+});
+
+function getItemFilters() {
+   const params = new URLSearchParams();
+   const parceiro = $('#filtro-parceiro-item').val();
+   const itemId = $('#filtro-item-id').val();
+   const dataInicio = $('#filtro-data-inicio-item').val();
+   const dataFim = $('#filtro-data-fim-item').val();
+   if (parceiro) params.append('parceiro_id', parceiro);
+   if (itemId) params.append('item_id', itemId);
+   if (dataInicio) params.append('data_inicio', dataInicio);
+   if (dataFim) params.append('data_fim', dataFim);
+   return params.toString() ? '&' + params.toString() : '';
+}
+
 function itemStatusBadge(status) {
    if (status === 'Em Análise') {
       return `<span class="badge badge-primary text-uppercase" style="background-color: #FF9E4A;">Em Análise</span>`;
@@ -46,7 +64,7 @@ function loadItensPrincipal(page = 1) {
    const tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $('#listItens').html(tableLoad);
 
-   $.get(`${window.APP_URL}/itens/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/itens/list?page=${page}${getItemFilters()}`, function (data) {
       if (data.status === 'success') {
          $('#listItens').html('');
          const solicitacoes = data.solicitacoes;
@@ -88,7 +106,7 @@ function loadItensSecundario(page = 1) {
    const tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $('#listItensNaoAceitos').html(tableLoad);
 
-   $.get(`${window.APP_URL}/itens/listNaoAceitas?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/itens/listNaoAceitas?page=${page}${getItemFilters()}`, function (data) {
       if (data.status === 'success') {
          $('#listItensNaoAceitos').html('');
          const solicitacoesNaoAceitas = data.solicitacoesNaoAceitas;

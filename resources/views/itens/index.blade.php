@@ -6,6 +6,59 @@
 @section('content')
 <div class="card">
    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-filter mr-1"></i> Filtros</h3>
+   </div>
+   <div class="card-body">
+      <div class="row">
+         @can('Administrador')
+         <div class="col-md-3">
+            <div class="form-group">
+               <label>Parceiro:</label>
+               <select id="filtro-parceiro-item" class="form-control form-control-sm">
+                  <option value="">Todos</option>
+                  @foreach($parceiros as $p)
+                  <option value="{{ $p->id }}">{{ $p->name }}</option>
+                  @endforeach
+               </select>
+            </div>
+         </div>
+         @endcan
+         <div class="col-md-3">
+            <div class="form-group">
+               <label>Item:</label>
+               <select id="filtro-item-id" class="form-control form-control-sm">
+                  <option value="">Todos</option>
+                  @foreach($itensDisponiveis as $item)
+                  <option value="{{ $item->id }}">{{ $item->nome }}</option>
+                  @endforeach
+               </select>
+            </div>
+         </div>
+         <div class="col-md-2">
+            <div class="form-group">
+               <label>Data início:</label>
+               <input type="date" id="filtro-data-inicio-item" class="form-control form-control-sm">
+            </div>
+         </div>
+         <div class="col-md-2">
+            <div class="form-group">
+               <label>Data fim:</label>
+               <input type="date" id="filtro-data-fim-item" class="form-control form-control-sm">
+            </div>
+         </div>
+         <div class="col-md-2 d-flex align-items-end">
+            <div class="form-group w-100">
+               <button id="btn-filtrar-item" class="btn btn-success btn-sm btn-block">
+                  <i class="fas fa-search"></i> Filtrar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="card">
+   <div class="card-header">
       <span class="text-muted text-uppercase">Solicitações</span>
       <div class="card-tools">
          @if($parceiro)

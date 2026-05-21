@@ -8,13 +8,31 @@ function showError(message) {
 
 loadPrincipal();
 loadSecundario();
+
+$('#btn-filtrar-sol').on('click', function () {
+   loadPrincipal(1);
+   loadSecundario(1);
+});
+
+function getSolicitacaoFilters() {
+   const params = new URLSearchParams();
+   const parceiro = $('#filtro-parceiro-sol').val();
+   const status = $('#filtro-status-sol').val();
+   const dataInicio = $('#filtro-data-inicio-sol').val();
+   const dataFim = $('#filtro-data-fim-sol').val();
+   if (parceiro) params.append('parceiro_id', parceiro);
+   if (status) params.append('status', status);
+   if (dataInicio) params.append('data_inicio', dataInicio);
+   if (dataFim) params.append('data_fim', dataFim);
+   return params.toString() ? '&' + params.toString() : '';
+}
 function loadPrincipal(page = 1) {
    let tabela = $('#listSolicitacoes').closest('table');
    let numColunas = tabela.find('thead tr th').length;
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listSolicitacoes`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/solicitacoes/list?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/solicitacoes/list?page=${page}${getSolicitacaoFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#listSolicitacoes").html('');
          let solicitacoes = data.solicitacoes;
@@ -69,7 +87,7 @@ function loadSecundario(page = 1) {
    let tableLoad = `<tr><td colspan="${numColunas}" class="text-center"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></td></tr>`;
    $(`#listSolicitacoesNaoAceitas`).html(tableLoad);
 
-   $.get(`${window.APP_URL}/solicitacoes/listNaoAceitas?page=${page}`, function (data) {
+   $.get(`${window.APP_URL}/solicitacoes/listNaoAceitas?page=${page}${getSolicitacaoFilters()}`, function (data) {
       if (data.status == 'success') {
          $("#listSolicitacoesNaoAceitas").html('');
          let solicitacoesNaoAceitas = data.solicitacoesNaoAceitas;

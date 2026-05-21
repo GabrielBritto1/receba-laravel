@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cesta;
 use App\Models\Familia;
+use App\Models\Parceiro;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -49,52 +50,36 @@ class CestaController extends Controller
             $familias = $parceiro->familias;
          }
       }
-      return view('cestas.index', compact('cestasNaoSairam', 'cestasEmRota', 'cestasEntregue', 'parceiro', 'familias'));
+      $parceiros = Parceiro::orderBy('name')->get();
+      return view('cestas.index', compact('cestasNaoSairam', 'cestasEmRota', 'cestasEntregue', 'parceiro', 'familias', 'parceiros'));
    }
 
-   public function list()
+   public function list(Request $request)
    {
       $user = Auth::user();
       $parceiro = $user->parceiros->first();
 
-      if ($user->hasRole('Administrador')) {
-         $cestasNaoSairam = Cesta::latest()
-            ->with(['parceiro.sigla', 'familia.representante'])
-            ->where('status', 'Não saiu para entrega')
-            ->paginate(15);
-         $cestasEmRota = Cesta::latest()
-            ->with(['parceiro.sigla', 'familia.representante'])
-            ->where('status', 'Em rota')
-            ->paginate(15);
-         $cestasEntregue = Cesta::latest()
-            ->with(['parceiro.sigla', 'familia.representante'])
-            ->where('status', 'Entregue')
-            ->paginate(15);
-         $familias = Familia::all();
-      } else {
-         $cestasNaoSairam = Cesta::whereRaw('1 = 0')->paginate(15);
-         $cestasEmRota = Cesta::whereRaw('1 = 0')->paginate(15);
-         $cestasEntregue = Cesta::whereRaw('1 = 0')->paginate(15);
-         $familias = collect();
-         if ($parceiro) {
-            $cestasNaoSairam = Cesta::latest()
-               ->with(['parceiro.sigla', 'familia.representante'])
-               ->where('parceiro_id', $parceiro->id)
-               ->where('status', 'Não saiu para entrega')
-               ->paginate(15);
-            $cestasEmRota = Cesta::latest()
-               ->with(['parceiro.sigla', 'familia.representante'])
-               ->where('parceiro_id', $parceiro->id)
-               ->where('status', 'Em rota')
-               ->paginate(15);
-            $cestasEntregue = Cesta::orderBy('updated_at', 'desc')
-               ->with(['parceiro.sigla', 'familia.representante'])
-               ->where('parceiro_id', $parceiro->id)
-               ->where('status', 'Entregue')
-               ->paginate(15);
-            $familias = $parceiro->familias;
+      $newQuery = function () {
+         return Cesta::with(['parceiro.sigla', 'familia.representante']);
+      };
+
+      $applyFilters = function ($query) use ($user, $parceiro, $request) {
+         if ($user->hasRole('Administrador')) {
+            if ($request->filled('parceiro_id')) {
+               $query->where('parceiro_id', $request->parceiro_id);
+            }
+         } else {
+            $query->where('parceiro_id', $parceiro?->id ?? 0);
          }
-      }
+         return $query;
+      };
+
+      $cestasNaoSairam = $applyFilters($newQuery()->latest()->where('status', 'Não saiu para entrega'))->paginate(15);
+      $cestasEmRota = $applyFilters($newQuery()->latest()->where('status', 'Em rota'))->paginate(15);
+      $cestasEntregue = $applyFilters($newQuery()->orderBy('updated_at', 'desc')->where('status', 'Entregue'))->paginate(15);
+
+      $familias = $user->hasRole('Administrador') ? Familia::all() : ($parceiro ? $parceiro->familias : collect());
+
       return response()->json([
          'status' => 'success',
          'cestasNaoSairam' => $cestasNaoSairam->items(),

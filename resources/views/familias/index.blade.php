@@ -6,6 +6,52 @@
 @section('content')
 <div class="card">
    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-filter mr-1"></i> Filtros</h3>
+   </div>
+   <div class="card-body">
+      <div class="row">
+         <div class="col-md-4">
+            <div class="form-group">
+               <label>Nome do Representante:</label>
+               <input type="text" id="filtro-nome" class="form-control form-control-sm" placeholder="Buscar por nome...">
+            </div>
+         </div>
+         <div class="col-md-3">
+            <div class="form-group">
+               <label>Status:</label>
+               <select id="filtro-status" class="form-control form-control-sm">
+                  <option value="">Todos</option>
+                  <option value="1">Ativo</option>
+                  <option value="0">Inativo</option>
+               </select>
+            </div>
+         </div>
+         @can('Administrador')
+         <div class="col-md-3">
+            <div class="form-group">
+               <label>Parceiro:</label>
+               <select id="filtro-parceiro" class="form-control form-control-sm">
+                  <option value="">Todos</option>
+                  @foreach($parceiros as $p)
+                  <option value="{{ $p->id }}">{{ $p->name }}</option>
+                  @endforeach
+               </select>
+            </div>
+         </div>
+         @endcan
+         <div class="col-md-2 d-flex align-items-end">
+            <div class="form-group w-100">
+               <button id="btn-filtrar" class="btn btn-success btn-sm btn-block">
+                  <i class="fas fa-search"></i> Filtrar
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<div class="card">
+   <div class="card-header">
       <div class="card-tools">
          @if($parceiro)
          <button type="button" class="btn btn-success btn-sm text-bold" data-toggle="modal" data-target="#modalCadastrarFamilia">
