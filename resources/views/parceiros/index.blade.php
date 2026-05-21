@@ -47,8 +47,8 @@
 @stop
 
 @section('js')
-<script src="/assets/js/parceiro.js"></script>
-<script src="/assets/js/pagination.js"></script>
+<script src="{{ asset('assets/js/parceiro.js') }}"></script>
+<script src="{{ asset('assets/js/pagination.js') }}"></script>
 
 @if (session('success')
 && session('success_action') === 'store'

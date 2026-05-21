@@ -125,8 +125,8 @@
 @stop
 
 @section('js')
-<script src="/assets/js/cestas.js"></script>
-<script src="/assets/js/pagination.js"></script>
+<script src="{{ asset('assets/js/cesta.js') }}"></script>
+<script src="{{ asset('assets/js/pagination.js') }}"></script>
 
 @if (session('success'))
 <script>
