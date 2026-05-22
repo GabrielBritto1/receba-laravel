@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
    Route::get('/solicitacoes', [SolicitacaoController::class, 'index'])->name('solicitacoes.index');
    Route::get('/solicitacoes/list', [SolicitacaoController::class, 'list']);
    Route::get('/solicitacoes/listNaoAceitas', [SolicitacaoController::class, 'listNaoAceitas']);
+   Route::get('/solicitacoes/listEntregues', [SolicitacaoController::class, 'listEntregues'])->middleware('role:Administrador');
    Route::post('/solicitacoes', [SolicitacaoController::class, 'store'])->name('solicitacoes.store');
    Route::get('/solicitacoes/gerenciar_solicitacoes', [SolicitacaoController::class, 'gerenciarSolicitacoes'])->name('solicitacoes.gerenciar_solicitacoes')->middleware('role:Administrador');
    Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao')->middleware('role:Administrador');

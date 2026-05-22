@@ -43,6 +43,9 @@
                               @method('PUT')
                               <input type="hidden" name="status" value="Aceita">
                               <input type="datetime-local" hidden name="data_aceito" value="{{ now()->format('Y-m-d\TH:i') }}">
+                              <button form="recusar-{{ $solicitacao->id }}" type="submit" class="btn btn-danger btn-sm text-bold text-white mr-1">
+                                 <i class="fas fa-times"></i> Recusar
+                              </button>
                               <input type="text" name="quantidade_aceita" required class="form-control form-control-sm text-center text-bold col-2 mr-1">
                               <button type="submit" class="btn btn-warning btn-sm text-bold text-white">
                                  <i class="fas fa-check"></i> Aprovar
@@ -57,6 +60,15 @@
                      @endforelse
                   </tbody>
                </table>
+               @foreach($solicitacaoEmAnalise as $solicitacao)
+               <form id="recusar-{{ $solicitacao->id }}" action="{{ route('solicitacoes.alterar_status_solicitacao', $solicitacao) }}" method="POST" style="display:none">
+                  @csrf
+                  @method('PUT')
+                  <input type="hidden" name="status" value="Não Aceita">
+                  <input type="hidden" name="quantidade_aceita" value="0">
+                  <input type="hidden" name="data_aceito" value="{{ now()->format('Y-m-d\TH:i') }}">
+               </form>
+               @endforeach
             </div>
          </div>
       </div>
@@ -179,7 +191,7 @@
    </div>
 </section>
 
-<section class="solicitacoes_entregues">
+<section id="secaoEntregues" class="solicitacoes_entregues d-none">
    <div class="card">
       <div class="card-header">
          <span class="text-muted text-uppercase">Solicitações Entregues</span>
@@ -197,28 +209,9 @@
                         <th>Status das cestas</th>
                      </tr>
                   </thead>
-                  <tbody>
-                     @forelse($solicitacaoEntregue as $solicitacao)
-                     <tr>
-                        <td class="align-middle">
-                           <span class="badge text-dark" style="background-color: {{ $solicitacao->parceiro->sigla?->color ?? '#f1f1f1' }};">
-                              {{ $solicitacao->parceiro->sigla?->name ?? $solicitacao->parceiro->name }}
-                           </span>
-                        </td>
-                        <td class="align-middle">{{ $solicitacao->created_at->format('d/m/Y - H:i') }}</td>
-                        <td class="align-middle">{{ $solicitacao->data_previsao_entrega->format('d/m/Y - H:i') }}</td>
-                        <td class="align-middle">{{ $solicitacao->quantidade_aceita }}</td>
-                        <td class="align-middle">
-                           <span class="badge badge-success text-uppercase">{{ $solicitacao->status }}</span>
-                        </td>
-                     </tr>
-                     @empty
-                     <tr>
-                        <td class="align-middle text-center" colspan="6">Nenhuma solicitação entregue.</td>
-                     </tr>
-                     @endforelse
-                  </tbody>
+                  <tbody id="listSolicitacoesEntregues"></tbody>
                </table>
+               <div id="paginationLinksEntregues" class="mt-2 text-center"></div>
             </div>
          </div>
       </div>
@@ -273,6 +266,8 @@
 @stop
 
 @section('js')
+<script src="{{ asset('assets/js/pagination.js') }}"></script>
+<script src="{{ asset('assets/js/gerenciar_solicitacoes.js') }}"></script>
 @if (session('success'))
 <script>
    Swal.fire({
