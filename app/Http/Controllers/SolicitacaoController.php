@@ -189,10 +189,29 @@ class SolicitacaoController extends Controller
       $solicitacaoEmAnalise = Solicitacao::cestas()->where('status', 'Em Análise')->orderBy('created_at', 'desc')->paginate(15);
       $solicitacaoAceita = Solicitacao::cestas()->where('status', 'Aceita')->orderBy('created_at', 'desc')->paginate(15);
       $solicitacaoMontada = Solicitacao::cestas()->where('status', 'Montada')->orderBy('created_at', 'desc')->paginate(15);
-      $solicitacaoEntregue = Solicitacao::cestas()->where('status', 'Entregue')->orderBy('created_at', 'desc')->paginate(15);
       $solicitacaoNaoAceita = Solicitacao::cestas()->where('quantidade_nao_aceita', '>', 0)->orderBy('created_at', 'desc')->paginate(15);
 
-      return view('solicitacoes.gerenciar_solicitacoes', compact('solicitacaoEmAnalise', 'solicitacaoAceita', 'solicitacaoMontada', 'solicitacaoEntregue', 'solicitacaoNaoAceita'));
+      return view('solicitacoes.gerenciar_solicitacoes', compact('solicitacaoEmAnalise', 'solicitacaoAceita', 'solicitacaoMontada', 'solicitacaoNaoAceita'));
+   }
+
+   public function listEntregues(Request $request)
+   {
+      abort_unless(Auth::user()->hasRole('Administrador'), 403);
+
+      $solicitacoesEntregues = Solicitacao::cestas()->with('parceiro.sigla')
+         ->where('status', 'Entregue')
+         ->orderBy('created_at', 'desc')
+         ->paginate(50);
+
+      return response()->json([
+         'status' => 'success',
+         'solicitacoesEntregues' => $solicitacoesEntregues->items(),
+         'paginationEntregues' => [
+            'current_page' => $solicitacoesEntregues->currentPage(),
+            'last_page' => $solicitacoesEntregues->lastPage(),
+            'total' => $solicitacoesEntregues->total(),
+         ],
+      ]);
    }
 
    public function atualizarStatusSolicitacao(Request $request, Solicitacao $solicitacao)

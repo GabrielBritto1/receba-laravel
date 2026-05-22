@@ -99,7 +99,12 @@ class RelatorioController extends Controller
          ->where('status', 'Entregue');
 
       // --- 3. FILTRO DE PERÍODO ---
-      if ($request->filled('ano_selecionado') && $request->ano_selecionado != 'periodo_atual') {
+      if ($request->filled('mes_inicio') && $request->filled('mes_fim')) {
+         $inicio = Carbon::createFromFormat('Y-m', $request->mes_inicio)->startOfMonth();
+         $fim = Carbon::createFromFormat('Y-m', $request->mes_fim)->endOfMonth();
+         $query->whereBetween('data_entrega', [$inicio, $fim]);
+         $meses = CarbonPeriod::create($inicio, '1 month', $fim);
+      } elseif ($request->filled('ano_selecionado') && $request->ano_selecionado != 'periodo_atual') {
          $ano = $request->ano_selecionado;
          $query->whereYear('data_entrega', $ano);
          $meses = CarbonPeriod::create(Carbon::create($ano, 1, 1), '1 month', Carbon::create($ano, 12, 1));
@@ -141,6 +146,8 @@ class RelatorioController extends Controller
       // --- 5. AGRUPAMENTO DOS DADOS ---
       $familiasAgrupadas = $entregas->groupBy(function ($entrega) {
          return $entrega->familia_id . '-' . $entrega->parceiro_id;
+      })->sortBy(function ($grupo) {
+         return optional(optional($grupo->first()->familia)->representante)->nome ?? '';
       });
 
       $parceiros = Parceiro::orderBy('name')->get();

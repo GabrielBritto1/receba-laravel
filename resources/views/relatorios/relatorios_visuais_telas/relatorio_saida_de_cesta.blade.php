@@ -42,9 +42,8 @@
 
             <div class="col-md-4">
                <div class="form-group">
-                  <label>Selecione o período:</label>
-                  {{-- O nome do campo mudou para 'ano_selecionado' --}}
-                  <select name="ano_selecionado" class="form-control">
+                  <label>Selecione o período por ano:</label>
+                  <select name="ano_selecionado" class="form-control" {{ request('mes_inicio') || request('mes_fim') ? 'disabled' : '' }}>
                      <option value="periodo_atual">Período Atual (12 meses)</option>
                      @foreach ($anosDisponiveis as $ano)
                      <option value="{{ $ano }}" {{ request('ano_selecionado') == $ano ? 'selected' : '' }}>
@@ -52,6 +51,20 @@
                      </option>
                      @endforeach
                   </select>
+               </div>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-md-4">
+               <div class="form-group">
+                  <label>Período específico — mês início:</label>
+                  <input type="month" name="mes_inicio" class="form-control" value="{{ request('mes_inicio') }}">
+               </div>
+            </div>
+            <div class="col-md-4">
+               <div class="form-group">
+                  <label>Período específico — mês fim:</label>
+                  <input type="month" name="mes_fim" class="form-control" value="{{ request('mes_fim') }}">
                </div>
             </div>
          </div>
