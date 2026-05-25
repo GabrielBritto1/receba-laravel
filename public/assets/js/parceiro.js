@@ -110,7 +110,7 @@ $(document).on('click', '.ativar-btn', function () {
             preConfirm: () => false,
          });
          $.ajax({
-            url: `/parceiros/${id}/toggleStatus`,
+            url: `${window.APP_URL}/parceiros/${id}/toggleStatus`,
             method: 'POST',
             data: {
                _token: csrfToken,
@@ -171,7 +171,7 @@ $(document).on('click', '.deletar-btn', function () {
                   }
                });
                $.ajax({
-                  url: `/parceiros/${id}/destroy`,
+                  url: `${window.APP_URL}/parceiros/${id}/destroy`,
                   method: 'POST',
                   data: {
                      _token: csrfToken,
