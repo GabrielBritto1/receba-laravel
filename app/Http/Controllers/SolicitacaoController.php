@@ -46,7 +46,6 @@ class SolicitacaoController extends Controller
       $parceiro = $user->parceiros->first();
 
       $query = Solicitacao::cestas()->with('parceiro.sigla')
-         ->where('quantidade_aceita', '>', 0)
          ->orderBy('created_at', 'desc');
 
       if ($user->hasRole('Administrador')) {
