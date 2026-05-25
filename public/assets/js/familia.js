@@ -104,7 +104,7 @@ function verificarCpf(cpf, isConjuge = false) {
    if (!cpf) return;
 
    $.ajax({
-      url: `/familias/check-cpf`,
+      url: `${window.APP_URL}/familias/check-cpf`,
       type: 'POST',
       data: {
          cpf: cpf
@@ -140,8 +140,7 @@ function verificarCpf(cpf, isConjuge = false) {
                   allowOutsideClick: false,
                }).then((result) => {
                   if (result.isConfirmed) {
-                     let redirectUrl = `/familias/${response.familia_id}/importacao_cpf`; // `"{{ route('familias.importacao_cpf', ['familia' => ':familiaId']) }}";
-                     redirectUrl = redirectUrl.replace(':familiaId', response.familia_id);
+                     let redirectUrl = `${window.APP_URL}/familias/${response.familia_id}/importacao_cpf`;
                      window.location.href = redirectUrl;
                   }
                });
@@ -229,7 +228,7 @@ $(document).on('click', '.ativar-btn', function () {
             preConfirm: () => false,
          });
          $.ajax({
-            url: `/familias/${id}/toggleStatus`,
+            url: `${window.APP_URL}/familias/${id}/toggleStatus`,
             method: 'POST',
             data: {
                _token: csrfToken,
@@ -290,7 +289,7 @@ $(document).on('click', '.deletar-btn', function () {
                   }
                });
                $.ajax({
-                  url: `/familias/${id}/destroy`,
+                  url: `${window.APP_URL}/familias/${id}/destroy`,
                   method: 'POST',
                   data: {
                      _token: csrfToken,
