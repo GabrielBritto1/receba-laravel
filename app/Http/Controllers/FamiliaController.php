@@ -33,7 +33,7 @@ class FamiliaController extends Controller
       $parceiro = $user->parceiros->first();
 
       $query = Familia::select('familias.*')
-         ->join('representantes', 'familias.id', '=', 'representantes.id')
+         ->join('representantes', 'familias.representante_id', '=', 'representantes.id')
          ->with(['representante', 'parceiro.sigla'])
          ->orderBy('representantes.nome');
 
