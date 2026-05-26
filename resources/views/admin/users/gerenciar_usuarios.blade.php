@@ -14,6 +14,7 @@
 <div
     class="card"
     x-data="gerenciarUsuarios()"
+    x-cloak
 >
     <div class="card-body p-0" style="display:flex; min-height:520px;">
 
@@ -48,7 +49,7 @@
                     >
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="font-weight-bold text-sm" x-text="user.name"></div>
+                                <div class="font-weight-bold" x-text="user.name"></div>
                                 <div class="text-muted" style="font-size:11px;" x-text="user.email"></div>
                             </div>
                             <span
@@ -60,7 +61,7 @@
                     </div>
                 </template>
 
-                <div x-show="filteredUsers.length === 0" class="p-3 text-muted text-sm text-center">
+                <div x-show="filteredUsers.length === 0" class="p-3 text-muted text-center" style="font-size:12px;">
                     Nenhum usuário encontrado.
                 </div>
             </div>
@@ -81,7 +82,7 @@
             </div>
 
             {{-- Formulário --}}
-            <div x-show="selected" x-cloak>
+            <div x-show="selected">
 
                 {{-- Cabeçalho --}}
                 <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
