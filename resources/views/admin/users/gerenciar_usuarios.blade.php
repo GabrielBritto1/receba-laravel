@@ -7,12 +7,11 @@
 @stop
 
 @section('css')
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 [x-cloak] { display: none !important; }
 
 .gu-wrap {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     border: 1px solid #dde4ee;
     border-radius: 14px;
     overflow: hidden;
@@ -49,7 +48,7 @@
     padding: 8px 12px 8px 32px;
     font-size: 12.5px;
     color: #1e293b;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     outline: none;
     transition: border-color .2s, box-shadow .2s;
 }
@@ -81,7 +80,7 @@
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 600; flex-shrink: 0;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: monospace;
     letter-spacing: -.5px;
 }
 .gu-user-name {
@@ -111,7 +110,7 @@
     padding: 9px 14px;
     border-top: 1px solid #dde4ee;
     font-size: 10.5px; color: #94a3b8;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: monospace;
     letter-spacing: .3px;
 }
 
@@ -142,7 +141,7 @@
     margin-bottom: 20px; border-bottom: 1.5px solid #eceff4;
 }
 .gu-fname { font-size: 17px; font-weight: 600; color: #1a2035; margin: 0; }
-.gu-fmeta { font-size: 11px; color: #94a3b8; margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+.gu-fmeta { font-size: 11px; color: #94a3b8; margin-top: 3px; font-family: monospace; }
 
 /* Toast */
 .gu-toast {
@@ -176,7 +175,7 @@
     border: 1.5px solid #e4e8f0; border-radius: 8px;
     padding: 9px 32px 9px 12px;
     font-size: 13px; color: #1e293b;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     outline: none; transition: border-color .18s, box-shadow .18s;
     -webkit-appearance: none; appearance: none;
 }
@@ -196,7 +195,7 @@
     border-radius: 8px; padding: 10px 20px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     transition: background .15s, transform .1s;
 }
 .gu-btn-primary:hover:not(:disabled) { background: #3b5bdb; }
@@ -207,7 +206,7 @@
     background: transparent; color: #64748b;
     border: 1.5px solid #dde3ed; border-radius: 8px;
     padding: 10px 16px; font-size: 13px; font-weight: 500;
-    cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer; font-family: 'Poppins', sans-serif;
     transition: border-color .15s, color .15s;
 }
 .gu-btn-ghost:hover:not(:disabled) { border-color: #94a3b8; color: #374151; }
@@ -266,7 +265,7 @@
                 <div class="gu-fhead">
                     <div>
                         <p class="gu-fname" x-text="selected ? selected.name : ''"></p>
-                        <div class="gu-fmeta" x-text="selected ? 'ID #' + selected.id : ''"></div>
+                        <div class="gu-fmeta" x-text="selected ? (selected.parceiro || '—') : ''"></div>
                     </div>
                     <div x-show="toast.show" x-transition class="gu-toast" :class="toast.type === 'success' ? 'gu-toast-ok' : 'gu-toast-err'">
                         <i :class="toast.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>

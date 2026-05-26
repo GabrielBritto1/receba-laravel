@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cesta;
 use App\Models\Familia;
 use App\Models\Parceiro;
+use App\Models\Solicitacao;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,15 @@ class HomeController extends Controller
       }
 
       $parceiros = Parceiro::count();
+
+      $solicitacoesQuery = Solicitacao::where('status', 'Em Análise');
+      if ($user->can('Administrador')) {
+         $solicitacoesPendentes = $solicitacoesQuery->count();
+      } elseif ($parceiro) {
+         $solicitacoesPendentes = (clone $solicitacoesQuery)->where('parceiro_id', $parceiro->id)->count();
+      } else {
+         $solicitacoesPendentes = 0;
+      }
 
       $familiasQuery = Familia::join('representantes', 'familias.id', '=', 'representantes.id');
       if ($user->can('Administrador')) {
@@ -100,14 +110,50 @@ class HomeController extends Controller
          return (int) $value;
       })->values();
 
+      // Solicitações: base query respeitando o escopo do usuário
+      $solicitacoesQuery = Solicitacao::query();
+      if (! $user->can('Administrador') && $parceiro) {
+         $solicitacoesQuery->where('parceiro_id', $parceiro->id);
+      } elseif (! $user->can('Administrador')) {
+         $solicitacoesQuery->whereRaw('1 = 0');
+      }
+
+      $solicitacoesPorMesRaw = (clone $solicitacoesQuery)
+         ->selectRaw('YEAR(created_at) as ano, MONTH(created_at) as mes, COUNT(*) as total')
+         ->where('created_at', '>=', Carbon::now()->startOfMonth()->subMonths(11))
+         ->groupBy('ano', 'mes')
+         ->orderBy('ano')
+         ->orderBy('mes')
+         ->get()
+         ->keyBy(function ($item) {
+            return sprintf('%04d-%02d', $item->ano, $item->mes);
+         });
+
+      $chartRequestData = $meses->map(function ($date) use ($solicitacoesPorMesRaw) {
+         return (int) optional($solicitacoesPorMesRaw->get($date->format('Y-m')))->total;
+      })->values();
+
+      $statusRaw = (clone $solicitacoesQuery)
+         ->selectRaw('status, COUNT(*) as total')
+         ->groupBy('status')
+         ->orderByDesc('total')
+         ->get();
+
+      $chartStatusLabels = $statusRaw->pluck('status')->values();
+      $chartStatusTotals = $statusRaw->pluck('total')->map(fn($v) => (int) $v)->values();
+
       return view('dashboard', compact(
          'parceiros',
          'familias',
          'cestas',
+         'solicitacoesPendentes',
          'chartLabels',
          'chartDeliveries',
          'chartOriginLabels',
-         'chartOriginTotals'
+         'chartOriginTotals',
+         'chartRequestData',
+         'chartStatusLabels',
+         'chartStatusTotals'
       ));
    }
 }
