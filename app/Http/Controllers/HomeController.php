@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cesta;
 use App\Models\Familia;
 use App\Models\Parceiro;
+use App\Models\Solicitacao;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,15 @@ class HomeController extends Controller
       }
 
       $parceiros = Parceiro::count();
+
+      $solicitacoesQuery = Solicitacao::where('status', 'Em Análise');
+      if ($user->can('Administrador')) {
+         $solicitacoesPendentes = $solicitacoesQuery->count();
+      } elseif ($parceiro) {
+         $solicitacoesPendentes = (clone $solicitacoesQuery)->where('parceiro_id', $parceiro->id)->count();
+      } else {
+         $solicitacoesPendentes = 0;
+      }
 
       $familiasQuery = Familia::join('representantes', 'familias.id', '=', 'representantes.id');
       if ($user->can('Administrador')) {
@@ -104,6 +114,7 @@ class HomeController extends Controller
          'parceiros',
          'familias',
          'cestas',
+         'solicitacoesPendentes',
          'chartLabels',
          'chartDeliveries',
          'chartOriginLabels',

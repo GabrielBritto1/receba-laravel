@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 @section('title', 'Painel - RECeBa')
 @section('content_header')
-<h1></h1>
+<h1>Painel <small class="text-muted" style="font-size:.6em;">visão geral</small></h1>
 @endsection
 @section('css')
 <style>
@@ -32,7 +32,6 @@
 @section('content')
 <div class="row">
    <div class="col-lg-3 col-6">
-      <!-- small box -->
       <div class="small-box bg-success">
          <div class="inner">
             <h3>{{ $cestas }}</h3>
@@ -44,10 +43,9 @@
          <a href="{{ route('cestas.index') }}" class="small-box-footer">Mais informações <i class="fas fa-arrow-circle-right"></i></a>
       </div>
    </div>
-   <!-- ./col -->
+
    @can('Administrador')
    <div class="col-lg-3 col-6">
-      <!-- small box -->
       <div class="small-box bg-danger">
          <div class="inner">
             <h3>{{ $parceiros }}</h3>
@@ -60,9 +58,8 @@
       </div>
    </div>
    @endcan
-   <!-- ./col -->
+
    <div class="col-lg-3 col-6">
-      <!-- small box -->
       <div class="small-box bg-primary">
          <div class="inner">
             <h3>{{ $familias }}</h3>
@@ -74,27 +71,25 @@
          <a href="{{ route('familias.index') }}" class="small-box-footer">Mais informações <i class="fas fa-arrow-circle-right"></i></a>
       </div>
    </div>
-   <!-- ./col -->
-   <div class="col-lg-3 col-6">
-      <!-- small box -->
-      <div class="small-box bg-secondary">
-         <div class="inner">
-            <h3 class="d-none d-md-block">Configurações</h3>
-            <p class="d-none d-md-block">ㅤ</p>
 
-            <!-- Tela Móvel -->
-            <h3 class="d-lg-none"><i class="fas fa-cog"></i></h3>
-            <p class="d-lg-none">Configurações</p>
+   <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+         <div class="inner">
+            <h3>{{ $solicitacoesPendentes }}</h3>
+            <p>Solicitações Pendentes</p>
          </div>
          <div class="icon">
-            <i class="fas fa-cog"></i>
+            <i class="fas fa-clock"></i>
          </div>
-
-         <a href="{{ route('users.configuracao', Auth::user()->id) }}" class="small-box-footer">Ir para configurações <i class="fas fa-arrow-circle-right"></i></a>
+         @can('Administrador')
+            <a href="{{ route('solicitacoes.gerenciar_solicitacoes') }}" class="small-box-footer">Gerenciar <i class="fas fa-arrow-circle-right"></i></a>
+         @else
+            <a href="{{ route('solicitacoes.index') }}" class="small-box-footer">Ver solicitações <i class="fas fa-arrow-circle-right"></i></a>
+         @endcan
       </div>
    </div>
-   <!-- ./col -->
 </div>
+
 <div class="card dashboard-chart-card">
    <div class="card-header">
       <h3 class="card-title">Visão de Entregas</h3>
@@ -105,14 +100,14 @@
             <div class="chart-title">Evolução mensal</div>
             <div class="chart-subtitle">Últimos 12 meses de cestas entregues.</div>
             <div class="chart-box">
-               <canvas id="navegadoresChart"></canvas>
+               <canvas id="chart-entregas"></canvas>
             </div>
          </div>
          <div class="col-md-6">
             <div class="chart-title">Origem das entregas</div>
             <div class="chart-subtitle">Distribuição por ponto de origem registrado.</div>
             <div class="chart-box">
-               <canvas id="navegadoresChart2"></canvas>
+               <canvas id="chart-origem"></canvas>
             </div>
          </div>
       </div>
@@ -137,7 +132,7 @@
       return brandColors[index % brandColors.length];
    });
 
-   const ctx = document.getElementById('navegadoresChart').getContext('2d');
+   const ctx = document.getElementById('chart-entregas').getContext('2d');
    const gradient = ctx.createLinearGradient(0, 0, 0, 320);
    gradient.addColorStop(0, 'rgba(40, 167, 69, 0.30)');
    gradient.addColorStop(1, 'rgba(40, 167, 69, 0.02)');
@@ -197,7 +192,7 @@
       }
    });
 
-   const ctx2 = document.getElementById('navegadoresChart2').getContext('2d');
+   const ctx2 = document.getElementById('chart-origem').getContext('2d');
    new Chart(ctx2, {
       type: 'doughnut',
       data: {
