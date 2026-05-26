@@ -69,3 +69,93 @@ test('gerenciar_usuarios rejeita usuário sem role Administrador', function () {
 
     $response->assertForbidden();
 });
+
+test('update via AJAX atualiza nome e email e retorna JSON', function () {
+    $actor  = User::factory()->create();
+    $actor->assignRole('Administrador');
+    $target = User::factory()->create();
+
+    $response = $this
+        ->actingAs($actor)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->put(route('users.update', $target->id), [
+            'name'  => 'Novo Nome',
+            'email' => 'novo@email.com',
+        ]);
+
+    $response->assertOk()->assertJson(['message' => 'Usuário atualizado com sucesso!']);
+    expect($target->fresh()->name)->toBe('Novo Nome');
+    expect($target->fresh()->email)->toBe('novo@email.com');
+});
+
+test('update via AJAX sincroniza roles do usuário', function () {
+    $actor  = User::factory()->create();
+    $actor->assignRole('Administrador');
+    $target = User::factory()->create();
+    $target->assignRole('Administrador');
+
+    $response = $this
+        ->actingAs($actor)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->put(route('users.update', $target->id), [
+            'name'  => $target->name,
+            'email' => $target->email,
+            'roles' => ['Coordenador'],
+        ]);
+
+    $response->assertOk();
+    expect($target->fresh()->hasRole('Coordenador'))->toBeTrue();
+    expect($target->fresh()->hasRole('Administrador'))->toBeFalse();
+});
+
+test('update via AJAX sem password não altera a senha', function () {
+    $actor    = User::factory()->create();
+    $actor->assignRole('Administrador');
+    $target   = User::factory()->create();
+    $hashAntes = $target->password;
+
+    $response = $this
+        ->actingAs($actor)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->put(route('users.update', $target->id), [
+            'name'  => $target->name,
+            'email' => $target->email,
+        ]);
+
+    $response->assertOk();
+    expect($target->fresh()->password)->toBe($hashAntes);
+});
+
+test('update via AJAX com nova senha atualiza o hash', function () {
+    $actor    = User::factory()->create();
+    $actor->assignRole('Administrador');
+    $target   = User::factory()->create();
+    $hashAntes = $target->password;
+
+    $response = $this
+        ->actingAs($actor)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->put(route('users.update', $target->id), [
+            'name'     => $target->name,
+            'email'    => $target->email,
+            'password' => 'novasenha123',
+        ]);
+
+    $response->assertOk();
+    expect($target->fresh()->password)->not->toBe($hashAntes);
+});
+
+test('update via AJAX retorna 404 para usuário inexistente', function () {
+    $actor = User::factory()->create();
+    $actor->assignRole('Administrador');
+
+    $response = $this
+        ->actingAs($actor)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->put(route('users.update', 999999), [
+            'name'  => 'Nome',
+            'email' => 'email@test.com',
+        ]);
+
+    $response->assertNotFound();
+});
