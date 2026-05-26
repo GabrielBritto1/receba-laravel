@@ -11,6 +11,7 @@ beforeEach(function () {
 
 test('update rejeita role inexistente via AJAX', function () {
     $actor = User::factory()->create();
+    $actor->assignRole('Administrador');
     $target = User::factory()->create();
 
     $response = $this

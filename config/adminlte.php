@@ -282,9 +282,9 @@ return [
     |
     */
 
-   'laravel_asset_bundling' => false,
+   'laravel_asset_bundling' => 'vite_js_only',
    'laravel_css_path' => 'css/app.css',
-   'laravel_js_path' => 'js/app.js',
+   'laravel_js_path' => 'resources/js/app.js',
 
    /*
     |--------------------------------------------------------------------------
