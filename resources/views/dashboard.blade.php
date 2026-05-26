@@ -14,6 +14,7 @@
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 0.25rem;
+      font-family: 'Poppins', sans-serif;
    }
 
    .dashboard-chart-card .chart-subtitle {
@@ -113,31 +114,61 @@
       </div>
    </div>
 </div>
+
+<div class="card dashboard-chart-card mt-0">
+   <div class="card-header">
+      <h3 class="card-title">Solicitações</h3>
+   </div>
+   <div class="card-body">
+      <div class="row">
+         <div class="col-md-8">
+            <div class="chart-title">Solicitações criadas por mês</div>
+            <div class="chart-subtitle">Últimos 12 meses — cestas e itens.</div>
+            <div class="chart-box">
+               <canvas id="chart-solicitacoes-mes"></canvas>
+            </div>
+         </div>
+         <div class="col-md-4">
+            <div class="chart-title">Distribuição por status</div>
+            <div class="chart-subtitle">Situação atual de todas as solicitações.</div>
+            <div class="chart-box">
+               <canvas id="chart-solicitacoes-status"></canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
 @stop
 
 @section('js')
 <script>
-   const chartLabels = @json($chartLabels);
-   const chartDeliveries = @json($chartDeliveries);
-   const chartOriginLabels = @json($chartOriginLabels);
-   const chartOriginTotals = @json($chartOriginTotals);
+   const chartLabels       = {!! json_encode($chartLabels) !!};
+   const chartDeliveries   = {!! json_encode($chartDeliveries) !!};
+   const chartOriginLabels = {!! json_encode($chartOriginLabels) !!};
+   const chartOriginTotals = {!! json_encode($chartOriginTotals) !!};
+   const chartRequestData  = {!! json_encode($chartRequestData) !!};
+   const chartStatusLabels = {!! json_encode($chartStatusLabels) !!};
+   const chartStatusTotals = {!! json_encode($chartStatusTotals) !!};
 
-   Chart.defaults.global.defaultFontFamily = "'Nunito', 'Segoe UI', sans-serif";
+   Chart.defaults.global.defaultFontFamily = "'Poppins', 'Segoe UI', sans-serif";
    Chart.defaults.global.defaultFontColor = '#6c757d';
    Chart.defaults.global.elements.line.borderJoinStyle = 'round';
    Chart.defaults.global.elements.line.borderCapStyle = 'round';
 
-   const brandColors = ['#28a745', '#dc3545', '#fd7e14', '#007bff', '#6610f2', '#17a2b8'];
-   const pieColors = (chartOriginLabels.length ? chartOriginLabels : ['Sem dados']).map(function(_, index) {
-      return brandColors[index % brandColors.length];
-   });
+   var tooltipDefaults = {
+      backgroundColor: '#343a40',
+      titleFontColor: '#ffffff',
+      bodyFontColor: '#ffffff',
+      displayColors: false
+   };
 
-   const ctx = document.getElementById('chart-entregas').getContext('2d');
-   const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-   gradient.addColorStop(0, 'rgba(40, 167, 69, 0.30)');
-   gradient.addColorStop(1, 'rgba(40, 167, 69, 0.02)');
+   /* ── 1. Linha: Entregas por mês ────────────────────────────── */
+   var ctx1 = document.getElementById('chart-entregas').getContext('2d');
+   var gradEntregas = ctx1.createLinearGradient(0, 0, 0, 320);
+   gradEntregas.addColorStop(0, 'rgba(40,167,69,0.30)');
+   gradEntregas.addColorStop(1, 'rgba(40,167,69,0.02)');
 
-   new Chart(ctx, {
+   new Chart(ctx1, {
       type: 'line',
       data: {
          labels: chartLabels,
@@ -145,7 +176,7 @@
             label: 'Cestas Entregues',
             data: chartDeliveries,
             borderColor: '#28a745',
-            backgroundColor: gradient,
+            backgroundColor: gradEntregas,
             borderWidth: 3,
             pointRadius: 4,
             pointHoverRadius: 6,
@@ -159,67 +190,91 @@
       options: {
          responsive: true,
          maintainAspectRatio: false,
-         legend: {
-            display: false
-         },
-         tooltips: {
-            backgroundColor: '#343a40',
-            titleFontColor: '#ffffff',
-            bodyFontColor: '#ffffff',
-            displayColors: false
-         },
+         legend: { display: false },
+         tooltips: tooltipDefaults,
          scales: {
-            yAxes: [{
-               ticks: {
-                  beginAtZero: true,
-                  precision: 0,
-                  padding: 10
-               },
-               gridLines: {
-                  color: 'rgba(0, 0, 0, 0.06)',
-                  drawBorder: false
-               }
-            }],
-            xAxes: [{
-               gridLines: {
-                  display: false
-               },
-               ticks: {
-                  padding: 8
-               }
-            }]
+            yAxes: [{ ticks: { beginAtZero: true, precision: 0, padding: 10 }, gridLines: { color: 'rgba(0,0,0,0.06)', drawBorder: false } }],
+            xAxes: [{ gridLines: { display: false }, ticks: { padding: 8 } }]
          }
       }
    });
 
-   const ctx2 = document.getElementById('chart-origem').getContext('2d');
-   new Chart(ctx2, {
+   /* ── 2. Donut: Origem das entregas ─────────────────────────── */
+   var brandColors = ['#28a745','#dc3545','#fd7e14','#007bff','#6610f2','#17a2b8'];
+   var pieColors = (chartOriginLabels.length ? chartOriginLabels : ['Sem dados']).map(function(_, i) {
+      return brandColors[i % brandColors.length];
+   });
+
+   new Chart(document.getElementById('chart-origem').getContext('2d'), {
       type: 'doughnut',
       data: {
          labels: chartOriginLabels.length ? chartOriginLabels : ['Sem dados'],
-         datasets: [{
-            data: chartOriginTotals.length ? chartOriginTotals : [1],
-            backgroundColor: pieColors,
-            borderWidth: 0,
-            hoverBorderWidth: 0
-         }]
+         datasets: [{ data: chartOriginTotals.length ? chartOriginTotals : [1], backgroundColor: pieColors, borderWidth: 0 }]
       },
       options: {
          responsive: true,
          maintainAspectRatio: false,
          cutoutPercentage: 58,
-         legend: {
-            position: 'bottom',
-            labels: {
-               boxWidth: 12,
-               padding: 18
-            }
-         },
-         tooltips: {
-            backgroundColor: '#343a40',
-            titleFontColor: '#ffffff',
-            bodyFontColor: '#ffffff'
+         legend: { position: 'bottom', labels: { boxWidth: 12, padding: 18 } },
+         tooltips: { backgroundColor: '#343a40', titleFontColor: '#fff', bodyFontColor: '#fff' }
+      }
+   });
+
+   /* ── 3. Barras: Solicitações por mês ───────────────────────── */
+   var ctx3 = document.getElementById('chart-solicitacoes-mes').getContext('2d');
+   var gradReq = ctx3.createLinearGradient(0, 0, 0, 320);
+   gradReq.addColorStop(0, 'rgba(0,123,255,0.75)');
+   gradReq.addColorStop(1, 'rgba(0,123,255,0.35)');
+
+   new Chart(ctx3, {
+      type: 'bar',
+      data: {
+         labels: chartLabels,
+         datasets: [{
+            label: 'Solicitações',
+            data: chartRequestData,
+            backgroundColor: gradReq,
+            borderColor: '#007bff',
+            borderWidth: 1,
+            borderRadius: 4
+         }]
+      },
+      options: {
+         responsive: true,
+         maintainAspectRatio: false,
+         legend: { display: false },
+         tooltips: tooltipDefaults,
+         scales: {
+            yAxes: [{ ticks: { beginAtZero: true, precision: 0, padding: 10 }, gridLines: { color: 'rgba(0,0,0,0.06)', drawBorder: false } }],
+            xAxes: [{ gridLines: { display: false }, ticks: { padding: 8 } }]
          }
+      }
+   });
+
+   /* ── 4. Donut: Status das solicitações ─────────────────────── */
+   var statusColorMap = {
+      'Em Análise': '#fd7e14',
+      'Aceita':     '#007bff',
+      'Montada':    '#6610f2',
+      'Entregue':   '#28a745',
+      'Recusada':   '#dc3545'
+   };
+   var statusColors = (chartStatusLabels.length ? chartStatusLabels : ['Sem dados']).map(function(s) {
+      return statusColorMap[s] || '#adb5bd';
+   });
+
+   new Chart(document.getElementById('chart-solicitacoes-status').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+         labels: chartStatusLabels.length ? chartStatusLabels : ['Sem dados'],
+         datasets: [{ data: chartStatusTotals.length ? chartStatusTotals : [1], backgroundColor: statusColors, borderWidth: 0 }]
+      },
+      options: {
+         responsive: true,
+         maintainAspectRatio: false,
+         cutoutPercentage: 58,
+         legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } },
+         tooltips: { backgroundColor: '#343a40', titleFontColor: '#fff', bodyFontColor: '#fff' }
       }
    });
 </script>

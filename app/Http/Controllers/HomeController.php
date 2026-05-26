@@ -110,6 +110,38 @@ class HomeController extends Controller
          return (int) $value;
       })->values();
 
+      // Solicitações: base query respeitando o escopo do usuário
+      $solicitacoesQuery = Solicitacao::query();
+      if (! $user->can('Administrador') && $parceiro) {
+         $solicitacoesQuery->where('parceiro_id', $parceiro->id);
+      } elseif (! $user->can('Administrador')) {
+         $solicitacoesQuery->whereRaw('1 = 0');
+      }
+
+      $solicitacoesPorMesRaw = (clone $solicitacoesQuery)
+         ->selectRaw('YEAR(created_at) as ano, MONTH(created_at) as mes, COUNT(*) as total')
+         ->where('created_at', '>=', Carbon::now()->startOfMonth()->subMonths(11))
+         ->groupBy('ano', 'mes')
+         ->orderBy('ano')
+         ->orderBy('mes')
+         ->get()
+         ->keyBy(function ($item) {
+            return sprintf('%04d-%02d', $item->ano, $item->mes);
+         });
+
+      $chartRequestData = $meses->map(function ($date) use ($solicitacoesPorMesRaw) {
+         return (int) optional($solicitacoesPorMesRaw->get($date->format('Y-m')))->total;
+      })->values();
+
+      $statusRaw = (clone $solicitacoesQuery)
+         ->selectRaw('status, COUNT(*) as total')
+         ->groupBy('status')
+         ->orderByDesc('total')
+         ->get();
+
+      $chartStatusLabels = $statusRaw->pluck('status')->values();
+      $chartStatusTotals = $statusRaw->pluck('total')->map(fn($v) => (int) $v)->values();
+
       return view('dashboard', compact(
          'parceiros',
          'familias',
@@ -118,7 +150,10 @@ class HomeController extends Controller
          'chartLabels',
          'chartDeliveries',
          'chartOriginLabels',
-         'chartOriginTotals'
+         'chartOriginTotals',
+         'chartRequestData',
+         'chartStatusLabels',
+         'chartStatusTotals'
       ));
    }
 }

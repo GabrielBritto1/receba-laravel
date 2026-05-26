@@ -49,7 +49,7 @@ return [
 
    'google_fonts' => [
       'allowed' => true,
-      'url' => ('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap'),
+      'url' => 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap',
    ],
 
    /*
