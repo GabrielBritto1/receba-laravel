@@ -266,7 +266,7 @@
                 <div class="gu-fhead">
                     <div>
                         <p class="gu-fname" x-text="selected ? selected.name : ''"></p>
-                        <div class="gu-fmeta" x-text="selected ? 'ID #' + selected.id : ''"></div>
+                        <div class="gu-fmeta" x-text="selected ? (selected.parceiro || '—') : ''"></div>
                     </div>
                     <div x-show="toast.show" x-transition class="gu-toast" :class="toast.type === 'success' ? 'gu-toast-ok' : 'gu-toast-err'">
                         <i :class="toast.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
