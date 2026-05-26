@@ -13,17 +13,18 @@
 
 .gu-wrap {
     font-family: 'IBM Plex Sans', sans-serif;
-    border: none;
+    border: 1px solid #dde4ee;
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.07);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
 }
 
 /* ── LEFT PANEL ─────────────────────────────── */
 .gu-left {
     width: 290px;
     min-width: 290px;
-    background: #191e2d;
+    background: #f0f4fb;
+    border-right: 1px solid #dde4ee;
     display: flex;
     flex-direction: column;
     min-height: 560px;
@@ -31,49 +32,49 @@
 
 .gu-search-wrap {
     padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid #dde4ee;
 }
 .gu-search-box { position: relative; }
 .gu-search-icon-wrap {
     position: absolute; left: 10px; top: 50%;
     transform: translateY(-50%);
-    color: rgba(255,255,255,0.25);
+    color: #94a3b8;
     font-size: 11px; pointer-events: none;
 }
 .gu-search-input {
     width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.09);
+    background: #fff;
+    border: 1px solid #d1d9e6;
     border-radius: 8px;
     padding: 8px 12px 8px 32px;
     font-size: 12.5px;
-    color: #e2e8f0;
+    color: #1e293b;
     font-family: 'IBM Plex Sans', sans-serif;
     outline: none;
-    transition: border-color .2s, background .2s;
+    transition: border-color .2s, box-shadow .2s;
 }
-.gu-search-input::placeholder { color: rgba(255,255,255,0.22); }
+.gu-search-input::placeholder { color: #b0bccf; }
 .gu-search-input:focus {
-    border-color: rgba(99,130,255,0.55);
-    background: rgba(255,255,255,0.09);
+    border-color: #6382ff;
+    box-shadow: 0 0 0 3px rgba(99,130,255,.1);
 }
 
 .gu-list { flex: 1; overflow-y: auto; }
 .gu-list::-webkit-scrollbar { width: 3px; }
-.gu-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+.gu-list::-webkit-scrollbar-thumb { background: #c8d3e4; border-radius: 2px; }
 
 .gu-user-row {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 14px;
     cursor: pointer;
     border-left: 3px solid transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
+    border-bottom: 1px solid #e8edf5;
     transition: background .13s, border-color .13s;
 }
-.gu-user-row:hover { background: rgba(255,255,255,0.04); }
+.gu-user-row:hover { background: #e6ecf7; }
 .gu-user-row.is-active {
-    background: rgba(99,130,255,0.10);
-    border-left-color: #6382ff;
+    background: #dce7ff;
+    border-left-color: #4f6ef7;
 }
 
 .gu-avatar {
@@ -84,32 +85,32 @@
     letter-spacing: -.5px;
 }
 .gu-user-name {
-    font-size: 13px; font-weight: 500; color: #dde3ef;
+    font-size: 13px; font-weight: 500; color: #1e293b;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .gu-user-email {
-    font-size: 11px; color: rgba(255,255,255,0.3);
+    font-size: 11px; color: #64748b;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
 }
 .gu-info { flex: 1; min-width: 0; }
 
 .gu-badge {
-    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
     border-radius: 20px; flex-shrink: 0; letter-spacing: .2px;
 }
-.gu-badge-admin { background: rgba(16,185,129,.14); color: #34d399; }
-.gu-badge-coord { background: rgba(99,130,255,.14); color: #8ba4ff; }
-.gu-badge-secr  { background: rgba(251,191,36,.13);  color: #fbbf24; }
-.gu-badge-none  { background: rgba(255,255,255,.06);  color: rgba(255,255,255,.3); }
+.gu-badge-admin { background: #d1fae5; color: #065f46; }
+.gu-badge-coord { background: #dbeafe; color: #1e40af; }
+.gu-badge-secr  { background: #fef3c7; color: #92400e; }
+.gu-badge-none  { background: #f1f5f9; color: #94a3b8; }
 
 .gu-list-empty {
     padding: 28px 16px; text-align: center;
-    color: rgba(255,255,255,.2); font-size: 12px;
+    color: #94a3b8; font-size: 12px;
 }
 .gu-footer {
     padding: 9px 14px;
-    border-top: 1px solid rgba(255,255,255,.05);
-    font-size: 10.5px; color: rgba(255,255,255,.2);
+    border-top: 1px solid #dde4ee;
+    font-size: 10.5px; color: #94a3b8;
     font-family: 'IBM Plex Mono', monospace;
     letter-spacing: .3px;
 }
@@ -117,7 +118,7 @@
 /* ── RIGHT PANEL ────────────────────────────── */
 .gu-right {
     flex: 1; padding: 26px 30px; overflow-y: auto;
-    background: #f8f9fb; min-height: 560px;
+    background: #fff; min-height: 560px;
 }
 
 .gu-empty {
@@ -127,7 +128,7 @@
 }
 .gu-empty-icon {
     width: 52px; height: 52px; border-radius: 14px;
-    background: #eef0f5; display: flex; align-items: center;
+    background: #f1f5f9; display: flex; align-items: center;
     justify-content: center; font-size: 20px; color: #bfc8d6;
     margin-bottom: 14px;
 }
@@ -191,14 +192,14 @@
 
 /* Buttons */
 .gu-btn-primary {
-    background: #191e2d; color: #fff; border: none;
+    background: #4f6ef7; color: #fff; border: none;
     border-radius: 8px; padding: 10px 20px;
     font-size: 13px; font-weight: 500;
     cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
     font-family: 'IBM Plex Sans', sans-serif;
     transition: background .15s, transform .1s;
 }
-.gu-btn-primary:hover:not(:disabled) { background: #242b40; }
+.gu-btn-primary:hover:not(:disabled) { background: #3b5bdb; }
 .gu-btn-primary:active:not(:disabled) { transform: scale(.98); }
 .gu-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 
