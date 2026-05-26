@@ -3,7 +3,10 @@
     "allow": [
       "Bash(docker compose exec *)",
       "Bash(grep *)",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)"
     ]
   }
 }

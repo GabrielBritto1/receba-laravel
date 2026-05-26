@@ -1,7 +1,7 @@
 @extends('adminlte::page')
 @section('title', 'Painel - RECeBa')
 @section('content_header')
-<h1>Painel <small class="text-muted" style="font-size:.6em;">visão geral</small></h1>
+<h1></h1>
 @endsection
 @section('css')
 <style>
