@@ -24,3 +24,35 @@ test('update rejeita role inexistente via AJAX', function () {
 
     $response->assertUnprocessable();
 });
+
+test('gerenciar_usuarios passa users com roles para a view', function () {
+    $user = User::factory()->create();
+    $user->assignRole('Coordenador');
+
+    $actor = User::factory()->create();
+
+    $response = $this
+        ->actingAs($actor)
+        ->get(route('users.gerenciar_usuarios'));
+
+    $response->assertOk();
+    $response->assertViewHas('users', function ($users) use ($user) {
+        $found = $users->firstWhere('id', $user->id);
+        return $found && in_array('Coordenador', $found['roles']->toArray());
+    });
+});
+
+test('gerenciar_usuarios passa lista de roles disponíveis para a view', function () {
+    $actor = User::factory()->create();
+
+    $response = $this
+        ->actingAs($actor)
+        ->get(route('users.gerenciar_usuarios'));
+
+    $response->assertOk();
+    $response->assertViewHas('roles', function ($roles) {
+        return $roles->contains('Administrador')
+            && $roles->contains('Coordenador')
+            && $roles->contains('Secretario');
+    });
+});

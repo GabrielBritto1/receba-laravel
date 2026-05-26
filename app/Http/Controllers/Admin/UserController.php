@@ -113,8 +113,14 @@ class UserController extends Controller
 
    public function gerenciarUsuarios()
    {
-      $users = User::all();
-      return view('admin.users.gerenciar_usuarios', compact('users'));
+      $users = User::with('roles')->get()->map(fn($u) => [
+         'id'    => $u->id,
+         'name'  => $u->name,
+         'email' => $u->email,
+         'roles' => $u->roles->pluck('name'),
+      ]);
+      $roles = Role::all()->pluck('name');
+      return view('admin.users.gerenciar_usuarios', compact('users', 'roles'));
    }
    public function gerenciarSiglas()
    {

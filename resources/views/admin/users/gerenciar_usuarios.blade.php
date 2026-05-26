@@ -10,7 +10,7 @@
       <select class="form-control" id="id-usuario">
          <option value="" disabled selected>Selecione o usuário</option>
          @forelse($users as $user)
-         <option value="{{ $user->id }}">{{ $user->name }}</option>
+         <option value="{{ $user['id'] ?? $user->id }}">{{ $user['name'] ?? $user->name }}</option>
          @empty
          <option value="">Nenhum usuário cadastrado</option>
          @endforelse
