@@ -128,7 +128,7 @@ class ParceiroController extends Controller
       } else {
          $parceiro = Auth::user()->parceiros->first();
          if (!$parceiro || $parceiro->id != $id) {
-            abort(403, 'Você não tem permissão para acessar esse parceiro.');
+            abort(403, 'Você não tem permissão para acessar esse parceiro.');
          }
          $coordenadores = $parceiro->users->filter(function ($user) {
             return $user->hasRole('Coordenador');
@@ -153,7 +153,7 @@ class ParceiroController extends Controller
       } else {
          $parceiro = Auth::user()->parceiros->first();
          if (!$parceiro || $parceiro->id != $id) {
-            abort(403, 'Você não tem permissão para editar esse parceiro.');
+            abort(403, 'Você não tem permissão para editar esse parceiro.');
          }
       }
       return view('parceiros.edit', compact('parceiro'));
@@ -185,7 +185,9 @@ class ParceiroController extends Controller
    public function destroy(string $id)
    {
       $parceiro = Parceiro::findOrFail($id);
+      $nomeParceiro = $parceiro->name;
       $parceiro->delete();
+      ActivityLogger::log('removido', "Parceiro excluído: {$nomeParceiro}");
       return redirect()->route('parceiros.index')->with(['success' => 'Parceiro excluído com sucesso!', 'success_action' => 'destroy']);
    }
 
@@ -225,6 +227,7 @@ class ParceiroController extends Controller
          ]);
       }
 
+      ActivityLogger::log('atualizado', "Sigla do parceiro {$parceiro->name} atualizada para: {$validated['sigla']}");
       return redirect()->route('users.gerenciar_siglas')->with('success', 'Sigla atualizada com sucesso!');
    }
 }

@@ -6,6 +6,7 @@ use App\Models\Cesta;
 use App\Models\Familia;
 use App\Models\Parceiro;
 use App\Models\User;
+use App\Support\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,6 +133,7 @@ class CestaController extends Controller
          'parceiro_id' => $parceiroId,
       ]);
 
+      ActivityLogger::log('criado', "Cesta solicitada: qtd {$cesta->quantidade_total}");
       return redirect()->route('cestas.index')->with('success', 'Cesta solicitada com sucesso!');
    }
 
@@ -186,6 +188,7 @@ class CestaController extends Controller
          'parceiro_id' => $parceiroId,
       ]);
 
+      ActivityLogger::log('criado', "Entrega própria registrada para família #{$validated['familia_id']}");
       return redirect()->route('cestas.index')->with('success', 'Cesta própria registrada com sucesso!');
    }
 
@@ -213,6 +216,7 @@ class CestaController extends Controller
       $cesta->status = 'Em rota';
       $cesta->save();
 
+      ActivityLogger::log('atualizado', "Cesta #{$cesta->id} saiu em rota para família #{$validated['familia_id']}");
       return redirect()->route('cestas.index')->with('success', 'Cesta em rota!');
    }
 
@@ -222,6 +226,7 @@ class CestaController extends Controller
       $cesta->status = 'Entregue';
       $cesta->save();
 
+      ActivityLogger::log('atualizado', "Cesta #{$cesta->id} entregue");
       return redirect()->route('cestas.index')->with('success', 'Cesta entregue!');
    }
 }

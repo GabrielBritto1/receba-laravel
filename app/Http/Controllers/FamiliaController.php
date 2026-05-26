@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreFamiliaRequest;
 use App\Models\Endereco;
 use App\Models\Familia;
+use App\Support\ActivityLogger;
 use App\Models\Parceiro;
 use App\Models\Pessoa;
 use App\Models\Representante;
@@ -150,6 +151,7 @@ class FamiliaController extends Controller
 
          DB::commit();
 
+         ActivityLogger::log('criado', "Família cadastrada: {$representante->nome} (CPF: {$representante->cpf})");
          return redirect()->route('familias.index')->with('success', 'Família cadastrada com sucesso!');
       } catch (\Exception $e) {
          DB::rollBack();
@@ -278,6 +280,7 @@ class FamiliaController extends Controller
          }
 
          DB::commit();
+         ActivityLogger::log('atualizado', "Família #{$familia->id} atualizada: {$representante->nome}");
          return redirect()->route('familias.show', $familia->id)->with('success', 'Família atualizada com sucesso!');
       } catch (\Exception $e) {
          DB::rollBack();
@@ -292,6 +295,7 @@ class FamiliaController extends Controller
    {
       $familia = Familia::findOrFail($id);
       $familia->delete();
+      ActivityLogger::log('removido', "Família #{$id} excluída");
       return redirect()->route('familias.index')->with(['success' => 'Família excluída com sucesso!', 'success_action' => 'destroy']);
    }
 
@@ -417,6 +421,7 @@ class FamiliaController extends Controller
          return redirect()->back()->with('error', 'Ocorreu um erro ao importar os dados da família.');
       }
 
+      ActivityLogger::log('criado', "Família importada: representante #{$validated['representante_id']} vinculado ao parceiro");
       return redirect()->route('familias.index')->with('success', 'Família associada ao seu parceiro com sucesso!');
    }
 
@@ -425,7 +430,8 @@ class FamiliaController extends Controller
       $familia = Familia::findOrFail($id);
       $familia->status = !$familia->status;
       $familia->save();
-
+      $statusLabel = $familia->status ? 'ativada' : 'inativada';
+      ActivityLogger::log('atualizado', "Família #{$id} {$statusLabel}");
       return redirect()->route('familias.index')->with('success', 'Status atualizado com sucesso!');
    }
 }
