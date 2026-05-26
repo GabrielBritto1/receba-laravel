@@ -57,7 +57,7 @@ class UserController extends Controller
 
       $data = $request->only('name', 'email');
       if ($request->filled('password')) {
-         $data['password'] = bcrypt($request->password);
+         $data['password'] = Hash::make($request->password);
       }
       $user->update($data);
       $user->syncRoles($request->input('roles', []));
