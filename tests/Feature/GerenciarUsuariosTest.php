@@ -4,9 +4,9 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    Role::create(['name' => 'Administrador', 'guard_name' => 'web']);
-    Role::create(['name' => 'Coordenador',   'guard_name' => 'web']);
-    Role::create(['name' => 'Secretario',    'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'Administrador', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'Coordenador',   'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'Secretario',    'guard_name' => 'web']);
 });
 
 test('update rejeita role inexistente via AJAX', function () {
