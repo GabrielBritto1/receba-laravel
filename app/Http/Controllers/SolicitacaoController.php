@@ -260,7 +260,7 @@ class SolicitacaoController extends Controller
 
       $solicitacao->save();
 
-      ActivityLogger::log('atualizado', "Status da solicitação de cesta #{\->id} atualizado para: {\->status}");
+      ActivityLogger::log('atualizado', "Status da solicitação de cesta #{$solicitacao->id} atualizado para: {$solicitacao->status}");
       return redirect()->route('solicitacoes.gerenciar_solicitacoes')->with('success', 'Status da cesta atualizado com sucesso!');
    }
 }

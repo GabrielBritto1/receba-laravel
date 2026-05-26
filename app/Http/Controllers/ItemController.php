@@ -266,7 +266,7 @@ class ItemController extends Controller
       }
 
       $solicitacao->save();
-
+      ActivityLogger::log('atualizado', "Status da solicitação de item #{$solicitacao->id} atualizado para: {$solicitacao->status}");
       return redirect()->route('solicitacoes.gerenciar_itens')->with('success', 'Status do item atualizado com sucesso!');
    }
 }

@@ -35,7 +35,8 @@ class UserController extends Controller
 
    public function store(StoreUserRequest $request)
    {
-      User::create($request->validated());
+      $user = User::create($request->validated());
+      ActivityLogger::log('criado', "Usuário criado: {$user->name} ({$user->email})");
       return redirect()->route('users.index')->with('success', 'Usuário criado com sucesso!');
    }
 
@@ -62,6 +63,7 @@ class UserController extends Controller
       $user->update($data);
       $user->syncRoles($request->input('roles', []));
 
+      ActivityLogger::log('atualizado', "Usuário atualizado: {$user->name} ({$user->email})");
       return $request->expectsJson()
          ? response()->json(['message' => 'Usuário atualizado com sucesso!'])
          : redirect()->route('users.configuracao', $user->id)->with('success', 'Usuário editado com sucesso!');
@@ -92,8 +94,8 @@ class UserController extends Controller
       if (Auth::user()->id === $user->id) {
          return back()->with('message', 'Você não pode excluir seu próprio usuário!');
       }
+      ActivityLogger::log('removido', "Usuário excluído: {$user->name} ({$user->email})");
       $user->delete();
-
       return redirect()->route('users.index')->with('success', 'Usuário deletado com sucesso!');
    }
 
@@ -158,6 +160,7 @@ class UserController extends Controller
       if ($role) {
          $user->assignRole($role);
       }
+      ActivityLogger::log('criado', "Coordenador criado: {$user->name} ({$user->email})");
       return redirect()->route('parceiros.index')->with(['success' => 'Coordenador inserido com sucesso!', 'success_action' => 'storeCoordenador']);
    }
 
@@ -185,6 +188,7 @@ class UserController extends Controller
       if ($role) {
          $user->assignRole($role);
       }
+      ActivityLogger::log('criado', "Secretário criado: {$user->name} ({$user->email})");
       return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
    }
 
@@ -217,6 +221,7 @@ class UserController extends Controller
          $user->assignRole($role);
       }
 
+      ActivityLogger::log('criado', "Secretário associado ao parceiro #{$request->parceiro_id}: {$user->name} ({$user->email})");
       if (Auth::user()->hasRole('Administrador')) {
          return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
       } else {
