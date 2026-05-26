@@ -30,6 +30,7 @@ test('gerenciar_usuarios passa users com roles para a view', function () {
     $user->assignRole('Coordenador');
 
     $actor = User::factory()->create();
+    $actor->assignRole('Administrador');
 
     $response = $this
         ->actingAs($actor)
@@ -44,6 +45,7 @@ test('gerenciar_usuarios passa users com roles para a view', function () {
 
 test('gerenciar_usuarios passa lista de roles disponíveis para a view', function () {
     $actor = User::factory()->create();
+    $actor->assignRole('Administrador');
 
     $response = $this
         ->actingAs($actor)
@@ -55,4 +57,15 @@ test('gerenciar_usuarios passa lista de roles disponíveis para a view', functio
             && $roles->contains('Coordenador')
             && $roles->contains('Secretario');
     });
+});
+
+test('gerenciar_usuarios rejeita usuário sem role Administrador', function () {
+    $actor = User::factory()->create();
+    // $actor has no role assigned — should be forbidden
+
+    $response = $this
+        ->actingAs($actor)
+        ->get(route('users.gerenciar_usuarios'));
+
+    $response->assertForbidden();
 });

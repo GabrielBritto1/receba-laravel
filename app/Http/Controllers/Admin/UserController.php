@@ -119,7 +119,7 @@ class UserController extends Controller
          'email' => $u->email,
          'roles' => $u->roles->pluck('name'),
       ]);
-      $roles = Role::all()->pluck('name');
+      $roles = Role::pluck('name');
       return view('admin.users.gerenciar_usuarios', compact('users', 'roles'));
    }
    public function gerenciarSiglas()
