@@ -19,6 +19,8 @@ class UpdateUserRequest extends StoreUserRequest
             'min:6',
             'max:20'
         ];
+        $rules['roles']    = ['nullable', 'array'];
+        $rules['roles.*']  = ['string', 'exists:roles,name'];
         return $rules;
     }
 }
