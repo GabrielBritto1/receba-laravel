@@ -13,13 +13,13 @@
                <div class="row">
                   <div class="col">
                      <div class="form-group">
-                        <label for="familia_id">Família</label>
-                        <select name="familia_id" id="familia_id" class="form-control">
-                           <option selected disabled value="">Selecione uma Família</option>
+                        <label for="familia_id_propria">Família</label>
+                        <select name="familia_id" id="familia_id_propria" class="form-control" style="width:100%">
+                           <option value="">Selecione uma Família</option>
                            @forelse($familias as $familia)
                            <option value="{{ $familia->id }}">{{ $familia->representante->nome ?? '' }}</option>
                            @empty
-                           <option value="">Nenhuma Família cadastrada</option>
+                           <option value="" disabled>Nenhuma Família cadastrada</option>
                            @endforelse
                         </select>
                      </div>
@@ -33,6 +33,7 @@
                      </div>
                   </div>
                </div>
+               <div id="historico-cestas-modal" class="mt-2"></div>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>

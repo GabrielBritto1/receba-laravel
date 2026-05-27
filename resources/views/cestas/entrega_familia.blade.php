@@ -4,6 +4,48 @@
 <h1 class="text-bold"><i class="fas fa-user-friends"></i> Entrega Família</h1>
 @stop
 
+@section('css')
+<style>
+   .select2-container--default .select2-selection--single {
+      height: calc(1.5em + .75rem + 2px);
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      display: flex;
+      align-items: center;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 1.5;
+      padding: 0 2rem 0 .75rem;
+      color: #495057;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__placeholder {
+      color: #6c757d;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 100%;
+      top: 0;
+   }
+   .select2-container--default.select2-container--focus .select2-selection--single,
+   .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+      outline: 0;
+   }
+   .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: #007bff;
+   }
+   .select2-results__option {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+   }
+</style>
+@endsection
+
 @section('content')
 <div class="card">
    <div class="card-body">
@@ -14,12 +56,12 @@
             <div class="col">
                <div class="form-group">
                   <label for="familia_id">Família</label>
-                  <select name="familia_id" id="familia_id" class="form-control">
-                     <option selected disabled value="">Selecione uma Família</option>
+                  <select name="familia_id" id="familia_id" class="form-control" style="width:100%">
+                     <option value="">Selecione uma Família</option>
                      @forelse($familias as $familia)
                      <option value="{{ $familia->id }}">{{ $familia->representante->nome ?? 'Nome não encontrado' }}</option>
                      @empty
-                     <option value="">Nenhuma Família cadastrada</option>
+                     <option value="" disabled>Nenhuma Família cadastrada</option>
                      @endforelse
                   </select>
                </div>
@@ -37,6 +79,11 @@
 @section('js')
 <script>
    $(document).ready(function() {
+      $('#familia_id').select2({
+         placeholder: 'Selecione uma Família',
+         allowClear: true,
+      });
+
       $('#enviar-cesta').on('click', function() {
          const cestaId = $(this).data('id');
          const familiaId = $('#familia_id').val();

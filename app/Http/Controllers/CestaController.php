@@ -31,7 +31,11 @@ class CestaController extends Controller
          $cestasEntregue = Cesta::latest()
             ->where('status', 'Entregue')
             ->paginate(2);
-         $familias = Familia::all();
+         $familias = Familia::join('representantes', 'familias.representante_id', '=', 'representantes.id')
+            ->orderBy('representantes.nome')
+            ->select('familias.*')
+            ->with('representante')
+            ->get();
       } else {
          $cestasPorParceiro = collect();
          $familias = collect();
@@ -48,7 +52,12 @@ class CestaController extends Controller
                ->where('parceiro_id', $parceiro->id)
                ->where('status', 'Entregue')
                ->paginate(2);
-            $familias = $parceiro->familias;
+            $familias = $parceiro->familias()
+               ->join('representantes', 'familias.representante_id', '=', 'representantes.id')
+               ->orderBy('representantes.nome')
+               ->select('familias.*')
+               ->with('representante')
+               ->get();
          }
       }
       $parceiros = Parceiro::orderBy('name')->get();
@@ -79,7 +88,20 @@ class CestaController extends Controller
       $cestasEmRota = $applyFilters($newQuery()->latest()->where('status', 'Em rota'))->paginate(15);
       $cestasEntregue = $applyFilters($newQuery()->orderBy('updated_at', 'desc')->where('status', 'Entregue'))->paginate(15);
 
-      $familias = $user->hasRole('Administrador') ? Familia::all() : ($parceiro ? $parceiro->familias : collect());
+      $familias = $user->hasRole('Administrador')
+         ? Familia::join('representantes', 'familias.representante_id', '=', 'representantes.id')
+            ->orderBy('representantes.nome')
+            ->select('familias.*')
+            ->with('representante')
+            ->get()
+         : ($parceiro
+            ? $parceiro->familias()
+               ->join('representantes', 'familias.representante_id', '=', 'representantes.id')
+               ->orderBy('representantes.nome')
+               ->select('familias.*')
+               ->with('representante')
+               ->get()
+            : collect());
 
       return response()->json([
          'status' => 'success',
@@ -200,7 +222,12 @@ class CestaController extends Controller
       if (!$parceiro) {
          throw new \Exception('O usuário logado não está vinculado a nenhum parceiro.');
       }
-      $familias = $parceiro->familias;
+      $familias = $parceiro->familias()
+         ->join('representantes', 'familias.representante_id', '=', 'representantes.id')
+         ->orderBy('representantes.nome')
+         ->select('familias.*')
+         ->with('representante')
+         ->get();
       return view('cestas.entrega_familia', compact('cesta', 'familias'));
    }
 
