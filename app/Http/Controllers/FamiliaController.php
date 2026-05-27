@@ -155,8 +155,8 @@ class FamiliaController extends Controller
          return redirect()->route('familias.index')->with('success', 'Família cadastrada com sucesso!');
       } catch (\Exception $e) {
          DB::rollBack();
-         dd($e);
          Log::error('Erro ao cadastrar família: ' . $e->getMessage());
+         ActivityLogger::log('erro', 'Falha ao cadastrar família: ' . $e->getMessage());
          return redirect()->back()->with('error', 'Erro ao cadastrar a família: ' . $e->getMessage())->withInput();
       }
    }
@@ -414,10 +414,8 @@ class FamiliaController extends Controller
          DB::commit();
       } catch (\Exception $e) {
          DB::rollBack();
-
-         // ADICIONE ESTE DD PARA VER QUALQUER ERRO QUE ACONTEÇA AQUI DENTRO
-         dd($e);
-
+         Log::error('Erro ao importar família: ' . $e->getMessage());
+         ActivityLogger::log('erro', 'Falha ao importar família: ' . $e->getMessage());
          return redirect()->back()->with('error', 'Ocorreu um erro ao importar os dados da família.');
       }
 

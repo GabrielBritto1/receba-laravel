@@ -122,6 +122,7 @@
                      <option value="atualizado">Atualizado</option>
                      <option value="removido">Removido</option>
                      <option value="solicitado">Solicitado</option>
+                     <option value="erro">Erro</option>
                   </select>
                </div>
                <div class="col-md-2">
@@ -178,6 +179,7 @@
          'atualizado': ['info',    'edit',          'Atualizado'],
          'removido':   ['danger',  'trash',         'Removido'],
          'solicitado': ['warning', 'shopping-bag',  'Solicitado'],
+         'erro':       ['danger',  'exclamation-triangle', 'Erro'],
       };
       const [color, icon, label] = map[action] ?? ['secondary', 'circle', action];
       return `<span class="badge badge-${color}"><i class="fas fa-${icon} mr-1"></i>${label}</span>`;

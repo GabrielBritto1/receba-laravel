@@ -6,7 +6,9 @@
       "Bash(php artisan *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(sed *)",
+      "Bash(python3 *)"
     ]
   }
 }
