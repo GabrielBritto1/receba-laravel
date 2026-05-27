@@ -3,6 +3,49 @@
 @section('content_header')
 <h1 class="text-bold"><i class="fas fa-calendar-plus"></i> Registrar Entrega</h1>
 @stop
+
+@section('css')
+<style>
+   .select2-container--default .select2-selection--single {
+      height: calc(1.5em + .75rem + 2px);
+      border: 1px solid #ced4da;
+      border-radius: .25rem;
+      display: flex;
+      align-items: center;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 1.5;
+      padding: 0 2rem 0 .75rem;
+      color: #495057;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__placeholder {
+      color: #6c757d;
+   }
+   .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 100%;
+      top: 0;
+   }
+   .select2-container--default.select2-container--focus .select2-selection--single,
+   .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+      outline: 0;
+   }
+   .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: #007bff;
+   }
+   .select2-results__option {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+   }
+</style>
+@endsection
+
 @section('content')
 @can('Administrador')
 <div class="card">
@@ -157,6 +200,66 @@
 @section('js')
 <script src="{{ asset('assets/js/cestas.js') }}"></script>
 <script src="{{ asset('assets/js/pagination.js') }}"></script>
+
+<script>
+   $('#modalEntregarCesta').on('shown.bs.modal', function () {
+      if (!$('#familia_id_propria').hasClass('select2-hidden-accessible')) {
+         $('#familia_id_propria').select2({
+            placeholder: 'Selecione uma Família',
+            allowClear: true,
+            dropdownParent: $('#modalEntregarCesta'),
+         });
+      }
+      $('#familia_id_propria').on('change', function () {
+         const familiaId = $(this).val();
+         const container = $('#historico-cestas-modal');
+         if (!familiaId) {
+            container.html('');
+            return;
+         }
+         container.html('<p class="text-muted"><i class="fa fa-spinner fa-pulse"></i> Buscando histórico...</p>');
+         let url = "{{ route('familias.getCestas', ['familia' => ':id']) }}".replace(':id', familiaId);
+         $.get(url, function (cestas) {
+            container.html('');
+            if (cestas.length === 0) {
+               container.html('<p class="text-muted">Nenhuma cesta entregue para esta família.</p>');
+               return;
+            }
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            let rows = '';
+            cestas.forEach(function (cesta) {
+               let cor = 'bg-secondary';
+               if (cesta.data_entrega) {
+                  const diff = (hoje - new Date(cesta.data_entrega)) / (1000 * 60 * 60 * 24);
+                  cor = diff <= 30 ? 'bg-danger' : 'bg-success';
+               }
+               const saida = cesta.data_em_rota ? new Date(cesta.data_em_rota).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-';
+               const entrega = cesta.data_entrega ? new Date(cesta.data_entrega).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '-';
+               rows += `<tr>
+                  <td>${cesta.parceiro.name}</td>
+                  <td class="text-white text-center font-weight-bold ${cor}">${saida}</td>
+                  <td class="text-white text-center font-weight-bold ${cor}">${entrega}</td>
+               </tr>`;
+            });
+            container.html(`
+               <h6 class="mt-2">Histórico de Entregas</h6>
+               <table class="table table-bordered table-sm">
+                  <thead><tr><th>Parceiro</th><th>Data de Saída</th><th>Data de Entrega</th></tr></thead>
+                  <tbody>${rows}</tbody>
+               </table>
+            `);
+         }).fail(function () {
+            container.html('<p class="text-danger">Erro ao buscar histórico.</p>');
+         });
+      });
+   });
+
+   $('#modalEntregarCesta').on('hidden.bs.modal', function () {
+      $('#familia_id_propria').val(null).trigger('change');
+      $('#historico-cestas-modal').html('');
+   });
+</script>
 
 @if (session('success'))
 <script>
