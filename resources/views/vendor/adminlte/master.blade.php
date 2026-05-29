@@ -130,7 +130,10 @@
     @endif
 
     {{-- App base URL for JS files --}}
-    <script>window.APP_URL = "{{ url('/') }}";</script>
+    <script>
+        window.APP_URL = "{{ url('/') }}";
+        window.IS_ADMIN = {{ (auth()->check() && auth()->user()->hasRole('Administrador')) ? 'true' : 'false' }};
+    </script>
 
     {{-- Custom Scripts --}}
     <script src="{{ asset('assets/js/number_formarter.js') }}"></script>

@@ -65,7 +65,7 @@ Route::middleware('auth')->group(function () {
    Route::get('/familias/{familia}/show', [FamiliaController::class, 'show'])->name('familias.show');
    Route::get('/familias/{familia}/edit', [FamiliaController::class, 'edit'])->name('familias.edit');
    Route::put('/familias/{familia}', [FamiliaController::class, 'update'])->name('familias.update');
-   Route::delete('/familias/{familia}/destroy', [FamiliaController::class, 'destroy'])->name('familias.destroy');
+   Route::delete('/familias/{familia}/destroy', [FamiliaController::class, 'destroy'])->name('familias.destroy')->middleware('role:Administrador');
    Route::get('/familias/{familia}/cestas', [FamiliaController::class, 'getCestas'])->name('familias.getCestas');
    Route::post('/familias/check-cpf', [FamiliaController::class, 'checkCpf'])->name('familias.checkCpf');
    Route::post('/familias/importar', [FamiliaController::class, 'importStore'])->name('familias.import.store');

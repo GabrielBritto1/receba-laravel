@@ -33,7 +33,7 @@
     --f-text2:       #46607e;
     --f-text3:       #8da0b8;
 
-    --font:          'Bricolage Grotesque', system-ui, sans-serif;
+    --font:          'Poppins', sans-serif;
     --mono:          'JetBrains Mono', monospace;
     --r:             14px;
     --r-sm:          9px;
