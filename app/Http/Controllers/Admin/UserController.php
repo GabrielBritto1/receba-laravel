@@ -56,12 +56,21 @@ class UserController extends Controller
             : redirect()->back()->with('message', 'Usuário não encontrado!');
       }
 
+      if (!Auth::user()->hasRole('Administrador') && Auth::id() != $user->id) {
+         return $request->expectsJson()
+            ? response()->json(['message' => 'Não autorizado.'], 403)
+            : redirect()->back()->with('message', 'Não autorizado!');
+      }
+
       $data = $request->only('name', 'email');
       if ($request->filled('password')) {
          $data['password'] = Hash::make($request->password);
       }
       $user->update($data);
-      $user->syncRoles($request->input('roles', []));
+
+      if (Auth::user()->hasRole('Administrador') && $request->has('roles')) {
+         $user->syncRoles($request->input('roles'));
+      }
 
       ActivityLogger::log('atualizado', "Usuário atualizado: {$user->name} ({$user->email})");
       return $request->expectsJson()
@@ -124,10 +133,10 @@ class UserController extends Controller
          'id'      => $u->id,
          'name'    => $u->name,
          'email'   => $u->email,
-         'roles'   => $u->roles->pluck('name'),
+         'roles'   => $u->roles->pluck('name')->values(),
          'parceiro' => optional($u->parceiros->first())->name,
       ]);
-      $roles = Role::pluck('name');
+      $roles = Role::pluck('name')->values();
       return view('admin.users.gerenciar_usuarios', compact('users', 'roles'));
    }
    public function gerenciarSiglas()
