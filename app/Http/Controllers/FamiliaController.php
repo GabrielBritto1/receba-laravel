@@ -293,9 +293,11 @@ class FamiliaController extends Controller
     */
    public function destroy(string $id)
    {
+      abort_unless(Auth::user()->hasRole('Administrador'), 403);
       $familia = Familia::findOrFail($id);
+      $nomeFamilia = $familia->representante->nome ?? "#{$id}";
       $familia->delete();
-      ActivityLogger::log('removido', "Família #{$id} excluída");
+      ActivityLogger::log('removido', "Família excluída: {$nomeFamilia}");
       return redirect()->route('familias.index')->with(['success' => 'Família excluída com sucesso!', 'success_action' => 'destroy']);
    }
 

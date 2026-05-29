@@ -67,9 +67,9 @@ function loadPrincipal(page = 1) {
                            <button type="button" class="btn btn-info btn-sm text-white ativar-btn" data-id="${item.id}">
                               <i class="fas fa-check"></i>
                            </button>
-                           <button type="button" class="btn btn-danger btn-sm deletar-btn" data-id="${item.id}">
+                           ${window.IS_ADMIN ? `<button type="button" class="btn btn-danger btn-sm deletar-btn" data-id="${item.id}">
                               <i class="fas fa-trash"></i>
-                           </button>
+                           </button>` : ''}
                         </div>
                      </td>
                   </tr>
