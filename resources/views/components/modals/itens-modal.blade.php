@@ -54,12 +54,21 @@
             </form>
          </div>
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            <button type="submit" class="btn btn-success" form="form-cadastrar-item"
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btn-fechar-item">Fechar</button>
+            <button type="submit" class="btn btn-success" form="form-cadastrar-item" id="btn-solicitar-item"
                {{ $itensDisponiveis->isEmpty() ? 'disabled' : '' }}>
-               Solicitar Itens ao IFES
+               <i class="fas fa-check mr-1"></i> Solicitar Itens ao IFES
             </button>
          </div>
       </div>
    </div>
 </div>
+
+<script>
+document.getElementById('form-cadastrar-item').addEventListener('submit', function () {
+   var btn = document.getElementById('btn-solicitar-item');
+   btn.disabled = true;
+   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sua solicitação está sendo feita...';
+   document.getElementById('btn-fechar-item').disabled = true;
+});
+</script>
