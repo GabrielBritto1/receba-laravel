@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SolicitacaoMail;
 use App\Models\Item;
 use App\Models\Parceiro;
 use App\Models\Solicitacao;
 use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ItemController extends Controller
 {
@@ -62,7 +65,7 @@ class ItemController extends Controller
          'quantidade_solicitada' => 'required|integer|min:1',
       ]);
 
-      Solicitacao::create([
+      $solicitacao = Solicitacao::create([
          'tipo' => 'item',
          'item_id' => $validated['item_id'],
          'data_previsao_entrega' => $validated['data_previsao_entrega'],
@@ -70,8 +73,15 @@ class ItemController extends Controller
          'parceiro_id' => $parceiroId,
       ]);
 
-      $itemNome = Item::find($validated['item_id'])?->nome ?? 'desconhecido';
-      ActivityLogger::log('solicitado', "Item solicitado: {$itemNome} (qtd: {$validated['quantidade_solicitada']})");
+      $solicitacao->load(['parceiro', 'item']);
+
+      try {
+         Mail::to('fpsimao@ifes.edu.br')->send(new SolicitacaoMail($solicitacao, $user));
+      } catch (\Throwable $e) {
+         Log::error('Falha ao enviar e-mail de solicitação de item: ' . $e->getMessage());
+      }
+
+      ActivityLogger::log('solicitado', "Item solicitado: {$solicitacao->item->nome} (qtd: {$solicitacao->quantidade_solicitada})");
       return redirect()->route('itens.index')->with('success', 'Item solicitado com sucesso, aguarde a aprovação!');
    }
 

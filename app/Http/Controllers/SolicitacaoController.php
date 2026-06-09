@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SolicitacaoMail;
 use App\Models\Cesta;
 use App\Models\Parceiro;
 use App\Models\Solicitacao;
 use Illuminate\Http\Request;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SolicitacaoController extends Controller
 {
@@ -146,6 +149,14 @@ class SolicitacaoController extends Controller
          'quantidade_solicitada' => $validated['quantidade_solicitada'],
          'parceiro_id' => $parceiroId,
       ]);
+
+      $solicitacao->load('parceiro');
+
+      try {
+         Mail::to('fpsimao@ifes.edu.br')->send(new SolicitacaoMail($solicitacao, $user));
+      } catch (\Throwable $e) {
+         Log::error('Falha ao enviar e-mail de solicitação de cesta: ' . $e->getMessage());
+      }
 
       ActivityLogger::log('solicitado', "Solicitação de cesta criada (quantidade: {$solicitacao->quantidade_solicitada})");
       return redirect()->route('solicitacoes.index')->with('success', 'Cesta solicitada com sucesso, aguarde a aprovação!');

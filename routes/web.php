@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CestaController;
+use App\Http\Controllers\EmailPreviewController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
@@ -102,6 +103,12 @@ Route::middleware('auth')->group(function () {
    Route::put('/solicitacoes/gerenciar_solicitacoes/{solicitacao}', [SolicitacaoController::class, 'atualizarStatusSolicitacao'])->name('solicitacoes.alterar_status_solicitacao')->middleware('role:Administrador');
    Route::get('/solicitacoes/gerenciar_itens', [ItemController::class, 'gerenciarItens'])->name('solicitacoes.gerenciar_itens')->middleware('role:Administrador');
    Route::put('/solicitacoes/gerenciar_itens/{solicitacao}', [ItemController::class, 'atualizarStatusSolicitacao'])->name('itens.alterar_status_solicitacao')->middleware('role:Administrador');
+
+   //EMAIL PREVIEW
+   Route::middleware('role:Administrador')->group(function () {
+      Route::get('/email/preview/solicitacao/{id?}', [EmailPreviewController::class, 'preview'])->name('email.preview.solicitacao');
+      Route::get('/email/preview/raw/solicitacao/{id?}', [EmailPreviewController::class, 'raw'])->name('email.preview.raw.solicitacao');
+   });
 
    //RELATORIOS
    Route::get('/relatorios/relatorio_visual', [RelatorioController::class, 'RelatorioVisual'])->name('relatorios.relatorio_visual');
