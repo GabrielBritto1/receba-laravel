@@ -9,7 +9,16 @@
       "Bash(git checkout *)",
       "Bash(sed *)",
       "Bash(python3 *)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(mkdir -p /Users/gabrielbritto/Documents/Projetos/receba-laravel/app/Mail)",
+      "Bash(mkdir -p /Users/gabrielbritto/Documents/Projetos/receba-laravel/resources/views/emails)",
+      "Bash(php -l app/Mail/SolicitacaoMail.php)",
+      "Bash(php -l app/Http/Controllers/EmailPreviewController.php)",
+      "Bash(php -l app/Http/Controllers/SolicitacaoController.php)",
+      "Bash(php -l app/Http/Controllers/ItemController.php)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/)",
+      "Bash(curl *)"
     ]
   }
 }
