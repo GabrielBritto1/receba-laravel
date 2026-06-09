@@ -35,9 +35,20 @@
             </form>
          </div>
          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            <button type="submit" class="btn btn-success" form="form-cadastrar-cesta">Solicitar Cesta ao IFES</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btn-fechar-cesta">Fechar</button>
+            <button type="submit" class="btn btn-success" form="form-cadastrar-cesta" id="btn-solicitar-cesta">
+               <i class="fas fa-check mr-1"></i> Solicitar Cesta ao IFES
+            </button>
          </div>
       </div>
    </div>
 </div>
+
+<script>
+document.getElementById('form-cadastrar-cesta').addEventListener('submit', function () {
+   var btn = document.getElementById('btn-solicitar-cesta');
+   btn.disabled = true;
+   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sua solicitação está sendo feita...';
+   document.getElementById('btn-fechar-cesta').disabled = true;
+});
+</script>
