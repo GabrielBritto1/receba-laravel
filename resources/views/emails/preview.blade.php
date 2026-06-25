@@ -20,7 +20,7 @@
             <div class="row">
                 <div class="col-md-3">
                     <strong>Destinatário:</strong><br>
-                    <span class="text-muted">fpsimao@ifes.edu.br</span>
+                    <span class="text-muted">projetociclosifes@gmail.com</span>
                 </div>
                 <div class="col-md-3">
                     <strong>Remetente:</strong><br>
