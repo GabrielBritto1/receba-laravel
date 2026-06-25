@@ -153,7 +153,7 @@ class SolicitacaoController extends Controller
       $solicitacao->load('parceiro');
 
       try {
-         Mail::to('fpsimao@ifes.edu.br')->send(new SolicitacaoMail($solicitacao, $user));
+         Mail::to('projetociclosifes@gmail.com')->send(new SolicitacaoMail($solicitacao, $user));
       } catch (\Throwable $e) {
          Log::error('Falha ao enviar e-mail de solicitação de cesta: ' . $e->getMessage());
       }
