@@ -40,14 +40,19 @@ class GeocodificarFamilias extends Command
         $ok = 0;
         $falhas = 0;
 
+        $usaGoogle = (bool) config('services.google.maps_key');
+        $this->info($usaGoogle ? 'Usando Google Maps API.' : 'Usando Nominatim (OpenStreetMap).');
+
         foreach ($familias as $familia) {
             try {
-                $resultado = $this->geocodificarComFallback($familia);
+                $resultado = $usaGoogle
+                    ? $this->geocodificarGoogle($familia)
+                    : $this->geocodificarComFallback($familia);
 
                 if ($resultado) {
                     $familia->update([
                         'latitude'  => (float) $resultado['lat'],
-                        'longitude' => (float) $resultado['lon'],
+                        'longitude' => (float) ($resultado['lon'] ?? $resultado['lng']),
                     ]);
                     $ok++;
                 } else {
@@ -69,6 +74,34 @@ class GeocodificarFamilias extends Command
         $this->info("Concluído: {$ok} geocodificada(s), {$falhas} sem resultado.");
 
         return self::SUCCESS;
+    }
+
+    private function geocodificarGoogle(Familia $familia): ?array
+    {
+        $numero = $this->normalizarNumero($familia->numero_casa);
+        $cidade = $familia->cidade ?: 'Alegre';
+
+        $endereco = implode(', ', array_filter([
+            $familia->endereco,
+            $numero,
+            $cidade,
+            'ES',
+            'Brasil',
+        ]));
+
+        $response = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/geocode/json', [
+            'address'    => $endereco,
+            'components' => 'country:BR|administrative_area:ES',
+            'key'        => config('services.google.maps_key'),
+        ]);
+
+        $dados = $response->json();
+
+        if (($dados['status'] ?? '') === 'OK' && ! empty($dados['results'][0]['geometry']['location'])) {
+            return $dados['results'][0]['geometry']['location'];
+        }
+
+        return null;
     }
 
     private function geocodificarComFallback(Familia $familia): ?array
