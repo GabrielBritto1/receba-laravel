@@ -47,7 +47,9 @@ class GeocodificarFamiliaJob implements ShouldQueue
         $endereco = implode(', ', array_filter([
             $familia->endereco,
             $numero,
+            $familia->bairro,
             $cidade,
+            $familia->cep,
             'ES',
             'Brasil',
         ]));
@@ -74,6 +76,15 @@ class GeocodificarFamiliaJob implements ShouldQueue
 
         $tentativas = [];
 
+        if ($numero && $familia->cep) {
+            $tentativas[] = [
+                'street'     => trim($familia->endereco . ', ' . $numero),
+                'city'       => $cidade,
+                'state'      => 'Espírito Santo',
+                'postalcode' => $familia->cep,
+            ];
+        }
+
         if ($numero) {
             $tentativas[] = [
                 'street' => trim($familia->endereco . ', ' . $numero),
@@ -93,6 +104,13 @@ class GeocodificarFamiliaJob implements ShouldQueue
                 'street' => $familia->bairro,
                 'city'   => $cidade,
                 'state'  => 'Espírito Santo',
+            ];
+        }
+
+        if ($familia->cep) {
+            $tentativas[] = [
+                'postalcode' => $familia->cep,
+                'country'    => 'Brasil',
             ];
         }
 

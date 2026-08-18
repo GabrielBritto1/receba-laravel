@@ -3,6 +3,9 @@
 @section('content_header')
 <h1 class="text-bold"><i class="fas fa-user-edit"></i> Editar Família de {{ $familia->representante->nome }}</h1>
 @stop
+@section('css')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+@stop
 @section('content')
 <form action="{{ route('familias.update', $familia->id) }}" method="POST">
    @csrf
@@ -74,15 +77,20 @@
                <label>Bairro</label>
                <input name="bairro" class="form-control" value="{{ old('bairro', $familia->bairro) }}">
             </div>
+            <div class="col-md-1 form-group">
+               <label>CEP</label>
+               <input name="cep" class="form-control" placeholder="00000-000" maxlength="9" value="{{ old('cep', $familia->cep) }}">
+            </div>
             <div class="col-md-2 form-group">
                <label>Cidade</label>
                <input name="cidade" class="form-control" value="{{ old('cidade', $familia->cidade) }}">
             </div>
-            <div class="col-md-2 form-group">
+            <div class="col-md-1 form-group">
                <label>Parceiro</label>
                <input class="form-control" value="{{ $familia->parceiro->name ?? $familia->parceiro->nome ?? 'Não vinculado' }}" disabled>
             </div>
          </div>
+         <small class="text-muted d-block mb-2">O CEP ajuda bastante a geocodificação a encontrar o local certo no mapa.</small>
          <div class="row">
             <div class="col-md-2 form-group">
                <label>Reside</label>
@@ -113,14 +121,14 @@
          <div class="row align-items-end">
             <div class="col-md-3 form-group">
                <label>Latitude</label>
-               <input name="latitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -20.7618" value="{{ old('latitude', $familia->latitude) }}">
+               <input id="input_latitude" name="latitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -20.7618" value="{{ old('latitude', $familia->latitude) }}">
             </div>
             <div class="col-md-3 form-group">
                <label>Longitude</label>
-               <input name="longitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -41.5325" value="{{ old('longitude', $familia->longitude) }}">
+               <input id="input_longitude" name="longitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -41.5325" value="{{ old('longitude', $familia->longitude) }}">
             </div>
             <div class="col-md-6 form-group">
-               <small class="text-muted">
+               <small class="text-muted" id="localizacao_status">
                   @if($familia->latitude && $familia->longitude)
                      <span class="text-success"><i class="fas fa-map-marker-alt"></i> Localização definida</span>
                      &mdash; <a href="https://www.google.com/maps?q={{ $familia->latitude }},{{ $familia->longitude }}" target="_blank">Ver no Google Maps</a>
@@ -129,6 +137,12 @@
                   @endif
                </small>
             </div>
+         </div>
+         <div class="form-group">
+            <small class="text-muted d-block mb-1">
+               Não mora em residência fixa (sem endereço)? Clique no mapa abaixo para marcar manualmente um ponto de referência (ex: próximo a um comércio ou praça conhecida).
+            </small>
+            <div id="mapa-marcar" style="height: 320px; border-radius: 4px;"></div>
          </div>
          <h4 class="text-bold mt-3">4. Composição de Membros</h4>
          <div class="row">
@@ -151,4 +165,60 @@
       </div>
    </div>
 </form>
+@stop
+
+@section('js')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      var alegreLat = -20.7618;
+      var alegreLng = -41.5325;
+
+      var inputLat = document.getElementById('input_latitude');
+      var inputLng = document.getElementById('input_longitude');
+      var status = document.getElementById('localizacao_status');
+
+      var latInicial = parseFloat(inputLat.value) || alegreLat;
+      var lngInicial = parseFloat(inputLng.value) || alegreLng;
+
+      var mapa = L.map('mapa-marcar').setView([latInicial, lngInicial], inputLat.value ? 16 : 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+         maxZoom: 18,
+      }).addTo(mapa);
+
+      var marcador = null;
+
+      function atualizarMarcador(lat, lng) {
+         if (marcador) {
+            marcador.setLatLng([lat, lng]);
+         } else {
+            marcador = L.marker([lat, lng], { draggable: true }).addTo(mapa);
+            marcador.on('dragend', function () {
+               var pos = marcador.getLatLng();
+               preencherCoordenadas(pos.lat, pos.lng);
+            });
+         }
+      }
+
+      function preencherCoordenadas(lat, lng) {
+         lat = lat.toFixed(7);
+         lng = lng.toFixed(7);
+         inputLat.value = lat;
+         inputLng.value = lng;
+         atualizarMarcador(lat, lng);
+         status.innerHTML = '<span class="text-success"><i class="fas fa-map-marker-alt"></i> Localização definida manualmente</span>'
+            + ' &mdash; <a href="https://www.google.com/maps?q=' + lat + ',' + lng + '" target="_blank">Ver no Google Maps</a>';
+      }
+
+      if (inputLat.value && inputLng.value) {
+         atualizarMarcador(latInicial, lngInicial);
+      }
+
+      mapa.on('click', function (e) {
+         preencherCoordenadas(e.latlng.lat, e.latlng.lng);
+      });
+   });
+</script>
 @stop

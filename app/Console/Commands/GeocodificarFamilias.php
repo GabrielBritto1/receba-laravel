@@ -84,7 +84,9 @@ class GeocodificarFamilias extends Command
         $endereco = implode(', ', array_filter([
             $familia->endereco,
             $numero,
+            $familia->bairro,
             $cidade,
+            $familia->cep,
             'ES',
             'Brasil',
         ]));
@@ -111,7 +113,17 @@ class GeocodificarFamilias extends Command
 
         $tentativas = [];
 
-        // 1. Rua + número + cidade + estado
+        // 1. Rua + número + CEP (mais preciso)
+        if ($numero && $familia->cep) {
+            $tentativas[] = [
+                'street'     => trim($familia->endereco . ', ' . $numero),
+                'city'       => $cidade,
+                'state'      => 'Espírito Santo',
+                'postalcode' => $familia->cep,
+            ];
+        }
+
+        // 2. Rua + número + cidade + estado
         if ($numero) {
             $tentativas[] = [
                 'street' => trim($familia->endereco . ', ' . $numero),
@@ -120,14 +132,14 @@ class GeocodificarFamilias extends Command
             ];
         }
 
-        // 2. Rua + cidade + estado (sem número)
+        // 3. Rua + cidade + estado (sem número)
         $tentativas[] = [
             'street' => $familia->endereco,
             'city'   => $cidade,
             'state'  => 'Espírito Santo',
         ];
 
-        // 3. Bairro + cidade + estado
+        // 4. Bairro + cidade + estado
         if ($familia->bairro) {
             $tentativas[] = [
                 'street' => $familia->bairro,
@@ -136,7 +148,15 @@ class GeocodificarFamilias extends Command
             ];
         }
 
-        // 4. Só cidade + estado (último recurso)
+        // 5. Só CEP
+        if ($familia->cep) {
+            $tentativas[] = [
+                'postalcode' => $familia->cep,
+                'country'    => 'Brasil',
+            ];
+        }
+
+        // 6. Só cidade + estado (último recurso)
         $tentativas[] = [
             'city'  => $cidade,
             'state' => 'Espírito Santo',

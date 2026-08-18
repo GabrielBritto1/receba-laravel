@@ -10,6 +10,7 @@ class Familia extends Model
    protected $fillable = [
       'numero_casa',
       'bairro',
+      'cep',
       'cidade',
       'nis',
       'doenca',
