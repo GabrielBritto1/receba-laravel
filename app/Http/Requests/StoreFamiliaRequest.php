@@ -31,6 +31,7 @@ class StoreFamiliaRequest extends FormRequest
          'endereco' => 'required|string|max:255',
          'numero_casa' => 'required|string|max:255',
          'bairro' => 'required|string|max:255',
+         'cep' => 'nullable|regex:/^\d{5}-?\d{3}$/',
          'cadunico' => 'required|string',
          // A regra 'sometimes' garante que o NIS só seja validado se for enviado
          'nis' => 'sometimes|nullable|string|max:255|unique:familias,nis',
@@ -71,6 +72,7 @@ class StoreFamiliaRequest extends FormRequest
       return [
          'cpf.unique' => 'Este CPF já está cadastrado no sistema.',
          'nis.unique' => 'Este NIS já está cadastrado no sistema.',
+         'cep.regex' => 'Informe um CEP válido (ex: 29500-000).',
       ];
    }
 }

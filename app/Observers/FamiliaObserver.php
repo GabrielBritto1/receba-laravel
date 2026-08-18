@@ -14,7 +14,7 @@ class FamiliaObserver
 
     public function updated(Familia $familia): void
     {
-        if ($familia->wasChanged(['endereco', 'numero_casa', 'bairro', 'cidade'])) {
+        if ($familia->wasChanged(['endereco', 'numero_casa', 'bairro', 'cep', 'cidade'])) {
             $familia->updateQuietly(['latitude' => null, 'longitude' => null]);
             GeocodificarFamiliaJob::dispatch($familia->id);
         }

@@ -91,9 +91,13 @@
                      <label for="numero_casa"><span class="text-danger">*</span>Número:</label>
                      <input type="text" class="form-control" name="numero_casa" id="numero_casa" placeholder="Ex: 123 ou S/N" value="{{ old('numero_casa') }}" required>
                   </div>
-                  <div class="col-md-6 form-group">
+                  <div class="col-md-4 form-group">
                      <label for="bairro"><span class="text-danger">*</span>Bairro:</label>
                      <input type="text" class="form-control" name="bairro" id="bairro" placeholder="Nome do bairro" value="{{ old('bairro') }}" required>
+                  </div>
+                  <div class="col-md-2 form-group">
+                     <label for="cep">CEP:</label>
+                     <input type="text" class="form-control" name="cep" id="cep" placeholder="00000-000" maxlength="9" value="{{ old('cep') }}">
                   </div>
                   <div class="col-md-6 form-group">
                      <label for="reside"><span class="text-danger">*</span>Reside em:</label>

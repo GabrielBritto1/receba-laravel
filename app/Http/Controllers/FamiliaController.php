@@ -111,6 +111,7 @@ class FamiliaController extends Controller
             'parceiro_id' => $parceiroId,
             'numero_casa' => $validatedData['numero_casa'],
             'bairro' => $validatedData['bairro'],
+            'cep' => $validatedData['cep'] ?? null,
             'cidade' => $validatedData['cidade'],
             'endereco' => $validatedData['endereco'],
             'nis' => $validatedData['nis'] ?? null,
@@ -204,6 +205,7 @@ class FamiliaController extends Controller
          'endereco' => 'required|string|max:255',
          'numero_casa' => 'nullable|string|max:20',
          'bairro' => 'nullable|string|max:100',
+         'cep' => ['nullable', 'regex:/^\d{5}-?\d{3}$/'],
          'cidade' => 'nullable|string|max:100',
          'reside' => 'nullable|string|max:100',
          'aluguel' => 'nullable|string|max:100',
@@ -244,6 +246,7 @@ class FamiliaController extends Controller
          $familia->endereco = $validated['endereco'];
          $familia->numero_casa = $validated['numero_casa'];
          $familia->bairro = $validated['bairro'];
+         $familia->cep = $validated['cep'] ?? null;
          $familia->cidade = $validated['cidade'];
          $familia->reside = $validated['reside'];
          $familia->aluguel = $validated['aluguel'];
@@ -409,6 +412,7 @@ class FamiliaController extends Controller
             'endereco' => $familiaOriginal->endereco,
             'numero_casa' => $familiaOriginal->numero_casa,
             'bairro' => $familiaOriginal->bairro,
+            'cep' => $familiaOriginal->cep,
             'cidade' => $familiaOriginal->cidade,
             'reside' => $familiaOriginal->reside,
             'aluguel' => $familiaOriginal->aluguel,
