@@ -4,7 +4,24 @@
 <h1></h1>
 @endsection
 @section('css')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
+   #mapa-entregas {
+      height: 420px;
+      border-radius: 0 0 4px 4px;
+   }
+   #mapa-entregas .leaflet-pane,
+   #mapa-entregas .leaflet-tile,
+   #mapa-entregas .leaflet-marker-icon,
+   #mapa-entregas .leaflet-marker-shadow,
+   #mapa-entregas .leaflet-tile-container,
+   #mapa-entregas .leaflet-map-pane svg,
+   #mapa-entregas .leaflet-map-pane canvas,
+   #mapa-entregas .leaflet-zoom-box,
+   #mapa-entregas .leaflet-image-layer,
+   #mapa-entregas .leaflet-layer {
+      position: absolute;
+   }
    .dashboard-chart-card .chart-box {
       position: relative;
       height: 320px;
@@ -115,6 +132,30 @@
    </div>
 </div>
 
+<div class="card mt-0">
+   <div class="card-header">
+      <h3 class="card-title">Mapa de Entregas</h3>
+      <div class="card-tools">
+         @php $semCoord = $mapaFamilias->where('aproximado', true)->count(); @endphp
+         <span class="badge badge-primary">{{ $mapaFamilias->count() }} no mapa</span>
+         @if($semCoord > 0)
+            <span class="badge badge-warning ml-1">{{ $semCoord }} aproximada(s)</span>
+         @endif
+      </div>
+   </div>
+   <div class="card-body p-0">
+      @if($mapaFamilias->isEmpty())
+         <div class="p-4 text-center text-muted">
+            <i class="fas fa-map-marker-alt fa-2x mb-2 d-block"></i>
+            Nenhuma família com coordenadas ainda.<br>
+            Execute <code>php artisan familias:geocodificar</code> para geocodificar os endereços.
+         </div>
+      @else
+         <div id="mapa-entregas"></div>
+      @endif
+   </div>
+</div>
+
 <div class="card dashboard-chart-card mt-0">
    <div class="card-header">
       <h3 class="card-title">Solicitações</h3>
@@ -141,6 +182,48 @@
 @stop
 
 @section('js')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      var pontos = {!! json_encode($mapaFamilias->values()) !!};
+      var el = document.getElementById('mapa-entregas');
+
+      if (!el || pontos.length === 0) return;
+
+      var mapa = L.map(el, { scrollWheelZoom: false });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+         maxZoom: 18,
+      }).addTo(mapa);
+
+      var iconeReal = new L.Icon({
+         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+         iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      });
+
+      var iconeAproximado = new L.Icon({
+         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+         iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+      });
+
+      var grupo = L.featureGroup();
+
+      pontos.forEach(function (f) {
+         var icone = f.aproximado ? iconeAproximado : iconeReal;
+         var popup = '<strong>' + f.nome + '</strong>'
+            + (f.end ? '<br><small>' + f.end + '</small>' : '')
+            + (f.aproximado ? '<br><small class="text-warning"><i>⚠ Localização aproximada (centro de Alegre)</i></small>' : '');
+         L.marker([f.lat, f.lng], { icon: icone }).bindPopup(popup).addTo(grupo);
+      });
+
+      grupo.addTo(mapa);
+      mapa.fitBounds(grupo.getBounds().pad(0.15));
+      mapa.invalidateSize();
+   });
+</script>
 <script>
    const chartLabels       = {!! json_encode($chartLabels) !!};
    const chartDeliveries   = {!! json_encode($chartDeliveries) !!};

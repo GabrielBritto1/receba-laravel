@@ -9,6 +9,7 @@ use App\Models\Solicitacao;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
@@ -142,6 +143,32 @@ class HomeController extends Controller
       $chartStatusLabels = $statusRaw->pluck('status')->values();
       $chartStatusTotals = $statusRaw->pluck('total')->map(fn($v) => (int) $v)->values();
 
+      $mapaFamilias = collect();
+
+      if (Schema::hasColumn('familias', 'latitude')) {
+         // Centro de Alegre-ES como fallback para famílias sem coordenadas
+         $alegreLat = -20.7618;
+         $alegreLng = -41.5325;
+
+         $mapaQuery = Familia::with('representante');
+
+         if ($user->can('Administrador')) {
+            // vê todas
+         } elseif ($parceiro) {
+            $mapaQuery->where('parceiro_id', $parceiro->id);
+         } else {
+            $mapaQuery->whereRaw('1 = 0');
+         }
+
+         $mapaFamilias = $mapaQuery->get()->map(fn($f) => [
+            'lat'        => $f->latitude  ? (float) $f->latitude  : $alegreLat,
+            'lng'        => $f->longitude ? (float) $f->longitude : $alegreLng,
+            'nome'       => optional($f->representante)->nome ?? 'Família #' . $f->id,
+            'end'        => implode(', ', array_filter([$f->endereco, $f->numero_casa, $f->bairro, $f->cidade])),
+            'aproximado' => ! ($f->latitude && $f->longitude),
+         ]);
+      }
+
       return view('dashboard', compact(
          'parceiros',
          'familias',
@@ -153,7 +180,8 @@ class HomeController extends Controller
          'chartOriginTotals',
          'chartRequestData',
          'chartStatusLabels',
-         'chartStatusTotals'
+         'chartStatusTotals',
+         'mapaFamilias'
       ));
    }
 }

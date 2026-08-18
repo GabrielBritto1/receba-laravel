@@ -20,6 +20,8 @@ class Familia extends Model
       'aluguel',
       'status',
       'endereco',
+      'latitude',
+      'longitude',
       'parceiro_id',
       'representante_id',
    ];
