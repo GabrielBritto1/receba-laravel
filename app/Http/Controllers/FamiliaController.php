@@ -223,6 +223,8 @@ class FamiliaController extends Controller
          'beneficio' => 'nullable|numeric',
          'salario' => 'nullable|numeric',
          'outros' => 'nullable|numeric',
+         'latitude' => 'nullable|numeric',
+         'longitude' => 'nullable|numeric',
       ]);
 
       DB::beginTransaction();
@@ -257,7 +259,19 @@ class FamiliaController extends Controller
             $familia->doenca = null;
             $familia->medicamento = null;
          }
-         $familia->save();
+
+         $latManual = isset($validated['latitude']) && $validated['latitude'] !== '' ? $validated['latitude'] : null;
+         $lngManual = isset($validated['longitude']) && $validated['longitude'] !== '' ? $validated['longitude'] : null;
+
+         if ($latManual !== null && $lngManual !== null) {
+            // Coordenadas definidas manualmente: salva sem disparar o observer de geocodificação
+            $familia->latitude  = $latManual;
+            $familia->longitude = $lngManual;
+            $familia->saveQuietly();
+         } else {
+            // Sem coordenadas manuais: mantém as existentes, observer geocodifica se endereço mudou
+            $familia->save();
+         }
 
          // Atualiza membros
          if ($membro) {

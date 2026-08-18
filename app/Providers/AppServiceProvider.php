@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Familia;
 use App\Models\Solicitacao;
 use App\Models\User;
+use App\Observers\FamiliaObserver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -18,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
 
    public function boot(): void
    {
+      Familia::observe(FamiliaObserver::class);
+
       Gate::define('Administrador', function (User $user): bool {
          return $user->hasRole('Administrador');
       });

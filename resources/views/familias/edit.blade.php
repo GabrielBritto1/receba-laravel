@@ -7,6 +7,15 @@
 <form action="{{ route('familias.update', $familia->id) }}" method="POST">
    @csrf
    @method('PUT')
+   @if($errors->any())
+   <div class="alert alert-danger">
+      <ul class="mb-0">
+         @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+         @endforeach
+      </ul>
+   </div>
+   @endif
    <div class="mb-3">
       <a href="{{ route('familias.show', $familia->id) }}" class="btn btn-secondary">&larr; Voltar</a>
       <button type="submit" class="btn btn-success float-right"><i class="fas fa-save"></i> Salvar Alterações</button>
@@ -99,6 +108,27 @@
          <div class="form-group">
             <label>Observações</label>
             <textarea name="descricao" class="form-control" rows="3">{{ old('descricao', $familia->descricao) }}</textarea>
+         </div>
+         <h4 class="text-bold mt-3">Localização no mapa</h4>
+         <div class="row align-items-end">
+            <div class="col-md-3 form-group">
+               <label>Latitude</label>
+               <input name="latitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -20.7618" value="{{ old('latitude', $familia->latitude) }}">
+            </div>
+            <div class="col-md-3 form-group">
+               <label>Longitude</label>
+               <input name="longitude" type="text" inputmode="decimal" class="form-control" placeholder="ex: -41.5325" value="{{ old('longitude', $familia->longitude) }}">
+            </div>
+            <div class="col-md-6 form-group">
+               <small class="text-muted">
+                  @if($familia->latitude && $familia->longitude)
+                     <span class="text-success"><i class="fas fa-map-marker-alt"></i> Localização definida</span>
+                     &mdash; <a href="https://www.google.com/maps?q={{ $familia->latitude }},{{ $familia->longitude }}" target="_blank">Ver no Google Maps</a>
+                  @else
+                     <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Sem localização &mdash; aparecerá no centro de Alegre no mapa</span>
+                  @endif
+               </small>
+            </div>
          </div>
          <h4 class="text-bold mt-3">4. Composição de Membros</h4>
          <div class="row">
