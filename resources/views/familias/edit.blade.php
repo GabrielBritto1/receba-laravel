@@ -168,6 +168,7 @@
 @stop
 
 @section('js')
+<script src="{{ asset('assets/js/mascaras.js') }}"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
    document.addEventListener('DOMContentLoaded', function () {
