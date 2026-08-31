@@ -135,4 +135,22 @@
    });
 </script>
 @endif
+
+@if (session('error'))
+<script>
+   Swal.fire({
+      icon: 'error',
+      title: 'Erro',
+      text: @json(session('error')),
+   });
+</script>
+@endif
+
+@if ($errors->any())
+<script>
+   $(document).ready(function () {
+      $('#modalCadastrarCesta').modal('show');
+   });
+</script>
+@endif
 @endsection

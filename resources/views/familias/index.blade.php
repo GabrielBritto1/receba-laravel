@@ -100,4 +100,22 @@
    });
 </script>
 @endif
+
+@if (session('error'))
+<script>
+   Swal.fire({
+      icon: 'error',
+      title: 'Erro ao cadastrar família',
+      text: @json(session('error')),
+   });
+</script>
+@endif
+
+@if ($errors->any() || session('error'))
+<script>
+   $(document).ready(function () {
+      $('#modalCadastrarFamilia').modal('show');
+   });
+</script>
+@endif
 @stop

@@ -101,10 +101,10 @@ class ParceiroController extends Controller
          'cnpj' => $validated['cnpj'] ?? null,
       ]);
 
-      $parceiro->users()->attach([
+      $parceiro->users()->attach(array_filter([
          $validated['coordenador_id'],
-         $validated['secretario_id']
-      ]);
+         $validated['secretario_id'] ?? null,
+      ]));
 
       ActivityLogger::log('criado', "Parceiro criado: {$parceiro->name}");
       return redirect()->route('parceiros.index')->with(['success' => 'Parceiro criado com sucesso!', 'success_action' => 'store']);

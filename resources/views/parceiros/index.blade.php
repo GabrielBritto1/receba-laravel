@@ -62,4 +62,31 @@
    });
 </script>
 @endif
+
+@if (session('error'))
+<script>
+   Swal.fire({
+      icon: 'error',
+      title: 'Erro',
+      text: @json(session('error')),
+   });
+</script>
+@endif
+
+@php
+   $modalPorOrigem = [
+      'coordenador' => '#cadastrarCoordenador',
+      'secretario' => '#cadastrarSecretario',
+      'parceiro' => '#cadastrarParceiro',
+      'secretario_associar' => '#associarSecretario',
+   ];
+   $modalParaReabrir = $modalPorOrigem[old('form_origin')] ?? null;
+@endphp
+@if (($errors->any() || session('error')) && $modalParaReabrir)
+<script>
+   $(document).ready(function () {
+      $('{{ $modalParaReabrir }}').modal('show');
+   });
+</script>
+@endif
 @stop

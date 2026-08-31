@@ -15,9 +15,11 @@ use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 
 class UserController extends Controller
@@ -147,90 +149,125 @@ class UserController extends Controller
 
    public function storeCoordenador(Request $request)
    {
-      $request->validate([
-         'name' => 'required',
-         'email' => 'required',
-         'endereco' => 'required',
-         'telefone' => 'required',
-         'cpf' => 'required'
+      $validated = $request->validate([
+         'name' => 'required|string|max:255',
+         'email' => 'required|email|max:255|unique:users,email',
+         'endereco' => 'required|string|max:255',
+         'telefone' => 'required|string|max:20',
+         'cpf' => 'required|string|max:20|unique:coordenadors,cpf',
+      ], [
+         'email.unique' => 'Este e-mail já está cadastrado no sistema.',
+         'cpf.unique' => 'Este CPF já está cadastrado como coordenador(a).',
       ]);
 
-      $user = User::create([
-         'name' => $request->name,
-         'email' => $request->email,
-         'password' => Hash::make($request->email),
-      ]);
-      $user->coordenador()->create([
-         'endereco' => $request->endereco,
-         'telefone' => $request->telefone,
-         'cpf' => $request->cpf,
-      ]);
-      $role = Role::where('name', 'Coordenador')->first();
-      if ($role) {
-         $user->assignRole($role);
+      DB::beginTransaction();
+      try {
+         $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['email']),
+         ]);
+         $user->coordenador()->create([
+            'endereco' => $validated['endereco'],
+            'telefone' => $validated['telefone'],
+            'cpf' => $validated['cpf'],
+         ]);
+         $role = Role::where('name', 'Coordenador')->first();
+         if ($role) {
+            $user->assignRole($role);
+         }
+         DB::commit();
+      } catch (\Exception $e) {
+         DB::rollBack();
+         Log::error('Erro ao cadastrar coordenador: ' . $e->getMessage());
+         return redirect()->back()->with('error', 'Erro ao cadastrar coordenador(a): ' . $e->getMessage())->withInput();
       }
+
       ActivityLogger::log('criado', "Coordenador criado: {$user->name} ({$user->email})");
       return redirect()->route('parceiros.index')->with(['success' => 'Coordenador inserido com sucesso!', 'success_action' => 'storeCoordenador']);
    }
 
    public function storeSecretario(Request $request)
    {
-      $request->validate([
-         'name' => 'required',
-         'email' => 'required',
-         'endereco' => 'required',
-         'telefone' => 'required',
-         'cpf' => 'required'
+      $validated = $request->validate([
+         'name' => 'required|string|max:255',
+         'email' => 'required|email|max:255|unique:users,email',
+         'endereco' => 'required|string|max:255',
+         'telefone' => 'required|string|max:20',
+         'cpf' => 'required|string|max:20|unique:secretarios,cpf',
+      ], [
+         'email.unique' => 'Este e-mail já está cadastrado no sistema.',
+         'cpf.unique' => 'Este CPF já está cadastrado como secretário(a).',
       ]);
 
-      $user = User::create([
-         'name' => $request->name,
-         'email' => $request->email,
-         'password' => Hash::make($request->email),
-      ]);
-      $user->secretario()->create([
-         'endereco' => $request->endereco,
-         'telefone' => $request->telefone,
-         'cpf' => $request->cpf,
-      ]);
-      $role = Role::where('name', 'Secretario')->first();
-      if ($role) {
-         $user->assignRole($role);
+      DB::beginTransaction();
+      try {
+         $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['email']),
+         ]);
+         $user->secretario()->create([
+            'endereco' => $validated['endereco'],
+            'telefone' => $validated['telefone'],
+            'cpf' => $validated['cpf'],
+         ]);
+         $role = Role::where('name', 'Secretario')->first();
+         if ($role) {
+            $user->assignRole($role);
+         }
+         DB::commit();
+      } catch (\Exception $e) {
+         DB::rollBack();
+         Log::error('Erro ao cadastrar secretário: ' . $e->getMessage());
+         return redirect()->back()->with('error', 'Erro ao cadastrar secretário(a): ' . $e->getMessage())->withInput();
       }
+
       ActivityLogger::log('criado', "Secretário criado: {$user->name} ({$user->email})");
       return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
    }
 
    public function storeSecretarioAssociar(Request $request)
    {
-      $request->validate([
-         'name' => 'required',
-         'email' => 'required',
-         'endereco' => 'required',
-         'telefone' => 'required',
-         'cpf' => 'required',
-         'parceiro_id' => 'required|exists:parceiros,id'
+      $validated = $request->validate([
+         'name' => 'required|string|max:255',
+         'email' => 'required|email|max:255|unique:users,email',
+         'endereco' => 'required|string|max:255',
+         'telefone' => 'required|string|max:20',
+         'cpf' => 'required|string|max:20|unique:secretarios,cpf',
+         'parceiro_id' => 'required|exists:parceiros,id',
+      ], [
+         'email.unique' => 'Este e-mail já está cadastrado no sistema.',
+         'cpf.unique' => 'Este CPF já está cadastrado como secretário(a).',
       ]);
 
-      $user = User::create([
-         'name' => $request->name,
-         'email' => $request->email,
-         'password' => Hash::make($request->email),
-      ]);
-      $user->secretario()->create([
-         'endereco' => $request->endereco,
-         'telefone' => $request->telefone,
-         'cpf' => $request->cpf,
-      ]);
+      DB::beginTransaction();
+      try {
+         $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['email']),
+         ]);
+         $user->secretario()->create([
+            'endereco' => $validated['endereco'],
+            'telefone' => $validated['telefone'],
+            'cpf' => $validated['cpf'],
+         ]);
 
-      $user->parceiros()->attach($request->parceiro_id);
+         $user->parceiros()->attach($validated['parceiro_id']);
 
-      $role = Role::where('name', 'Secretario')->first();
-      if ($role) {
-         $user->assignRole($role);
+         $role = Role::where('name', 'Secretario')->first();
+         if ($role) {
+            $user->assignRole($role);
+         }
+         DB::commit();
+      } catch (\Exception $e) {
+         DB::rollBack();
+         Log::error('Erro ao associar secretário: ' . $e->getMessage());
+         return redirect()->back()->with('error', 'Erro ao cadastrar secretário(a): ' . $e->getMessage())->withInput();
       }
 
-      ActivityLogger::log('criado', "Secretário associado ao parceiro #{$request->parceiro_id}: {$user->name} ({$user->email})");
+      ActivityLogger::log('criado', "Secretário associado ao parceiro #{$validated['parceiro_id']}: {$user->name} ({$user->email})");
       if (Auth::user()->hasRole('Administrador')) {
          return redirect()->route('parceiros.index')->with(['success' => 'Secretário inserido com sucesso!', 'success_action' => 'storeSecretario']);
       } else {
