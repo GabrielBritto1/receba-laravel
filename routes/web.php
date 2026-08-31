@@ -132,5 +132,6 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
+Route::get('/dashboard/entregas/exportar', [HomeController::class, 'exportarEntregas'])->name('dashboard.entregas.exportar')->middleware(['auth', 'verified']);
 
 require __DIR__ . '/auth.php';
