@@ -47,6 +47,7 @@
 @stop
 
 @section('js')
+<script src="{{ asset('assets/js/mascaras.js') }}"></script>
 <script src="{{ asset('assets/js/parceiro.js') }}"></script>
 <script src="{{ asset('assets/js/pagination.js') }}"></script>
 
