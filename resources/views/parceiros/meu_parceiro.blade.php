@@ -119,4 +119,22 @@
    });
 </script>
 @endif
+
+@if (session('error'))
+<script>
+   Swal.fire({
+      icon: 'error',
+      title: 'Erro',
+      text: @json(session('error')),
+   });
+</script>
+@endif
+
+@if (($errors->any() || session('error')) && old('form_origin') === 'secretario_associar')
+<script>
+   $(document).ready(function () {
+      $('#associarSecretario').modal('show');
+   });
+</script>
+@endif
 @stop

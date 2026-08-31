@@ -8,16 +8,26 @@
             </button>
          </div>
          <div class="modal-body">
+            @if ($errors->any())
+            <div class="alert alert-danger">
+               <h5 class="text-bold"><i class="fas fa-exclamation-triangle mr-1"></i>Corrija os campos abaixo:</h5>
+               <ul class="mb-0">
+                  @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                  @endforeach
+               </ul>
+            </div>
+            @endif
             <form action="{{ route('cestas.entregaCestaPropria') }}" method="POST">
                @csrf
                <div class="row">
                   <div class="col">
                      <div class="form-group">
                         <label for="familia_id_propria">Família</label>
-                        <select name="familia_id" id="familia_id_propria" class="form-control" style="width:100%">
+                        <select name="familia_id" id="familia_id_propria" class="form-control" style="width:100%" required>
                            <option value="">Selecione uma Família</option>
                            @forelse($familias as $familia)
-                           <option value="{{ $familia->id }}">{{ $familia->representante->nome ?? '' }}</option>
+                           <option value="{{ $familia->id }}" @selected(old('familia_id') == $familia->id)>{{ $familia->representante->nome ?? '' }}</option>
                            @empty
                            <option value="" disabled>Nenhuma Família cadastrada</option>
                            @endforelse
@@ -29,7 +39,7 @@
                   <div class="col">
                      <div class="form-group">
                         <label for="data_entrega">Data da Entrega Para a Família</label>
-                        <input type="datetime-local" class="form-control" id="data_entrega" name="data_entrega">
+                        <input type="datetime-local" class="form-control" id="data_entrega" name="data_entrega" value="{{ old('data_entrega') }}" required>
                      </div>
                   </div>
                </div>

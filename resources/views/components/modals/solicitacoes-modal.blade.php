@@ -8,6 +8,16 @@
             </button>
          </div>
          <div class="modal-body">
+            @if ($errors->any())
+            <div class="alert alert-danger">
+               <h5 class="text-bold"><i class="fas fa-exclamation-triangle mr-1"></i>Corrija os campos abaixo:</h5>
+               <ul class="mb-0">
+                  @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                  @endforeach
+               </ul>
+            </div>
+            @endif
             <form action="{{ route('solicitacoes.store') }}" method="POST" id="form-cadastrar-cesta">
                @csrf
                <div class="row">
@@ -22,13 +32,13 @@
                   <div class="col-12 col-md-6">
                      <div class="form-group">
                         <label for="data_previsao_entrega">Data da Entrega Parcial</label>
-                        <input type="datetime-local" class="form-control" id="data_previsao_entrega" name="data_previsao_entrega">
+                        <input type="datetime-local" class="form-control" id="data_previsao_entrega" name="data_previsao_entrega" value="{{ old('data_previsao_entrega') }}" required>
                      </div>
                   </div>
                   <div class="col-12 col-md-6">
                      <div class="form-group">
                         <label for="quantidade_solicitada">Solicitar uma Quantidade de Cesta</label>
-                        <input type="text" class="form-control" id="quantidade_solicitada" name="quantidade_solicitada">
+                        <input type="text" class="form-control" id="quantidade_solicitada" name="quantidade_solicitada" value="{{ old('quantidade_solicitada') }}" required>
                      </div>
                   </div>
                </div>

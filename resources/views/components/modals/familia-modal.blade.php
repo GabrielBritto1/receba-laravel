@@ -14,7 +14,7 @@
                {{-- Bloco para exibir erros de validação --}}
                @if ($errors->any())
                <div class="alert alert-danger">
-                  <h5 class="text-bold">Ocorreram os seguintes erros:</h5>
+                  <h5 class="text-bold"><i class="fas fa-exclamation-triangle mr-1"></i>Corrija os campos abaixo para cadastrar a família:</h5>
                   <ul class="mb-0">
                      @foreach ($errors->all() as $error)
                      <li>{{ $error }}</li>
