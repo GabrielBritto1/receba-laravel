@@ -143,30 +143,58 @@ class HomeController extends Controller
       $chartStatusLabels = $statusRaw->pluck('status')->values();
       $chartStatusTotals = $statusRaw->pluck('total')->map(fn($v) => (int) $v)->values();
 
-      $mapaFamilias = collect();
+      $mapaEntregas = collect();
+      $bairroConcentracao = null;
 
       if (Schema::hasColumn('familias', 'latitude')) {
-         // Centro de Alegre-ES como fallback para famílias sem coordenadas
+         // Centro de Alegre-ES como fallback para endereços sem coordenadas
          $alegreLat = -20.7618;
          $alegreLng = -41.5325;
 
-         $mapaQuery = Familia::with('representante');
+         $entreguesQuery = Cesta::query()
+            ->where('status', 'Entregue')
+            ->whereNotNull('familia_id');
 
          if ($user->can('Administrador')) {
             // vê todas
          } elseif ($parceiro) {
-            $mapaQuery->where('parceiro_id', $parceiro->id);
+            $entreguesQuery->where('parceiro_id', $parceiro->id);
          } else {
-            $mapaQuery->whereRaw('1 = 0');
+            $entreguesQuery->whereRaw('1 = 0');
          }
 
-         $mapaFamilias = $mapaQuery->get()->map(fn($f) => [
-            'lat'        => $f->latitude  ? (float) $f->latitude  : $alegreLat,
-            'lng'        => $f->longitude ? (float) $f->longitude : $alegreLng,
-            'nome'       => optional($f->representante)->nome ?? 'Família #' . $f->id,
-            'end'        => implode(', ', array_filter([$f->endereco, $f->numero_casa, $f->bairro, $f->cidade])),
-            'aproximado' => ! ($f->latitude && $f->longitude),
-         ]);
+         $porFamilia = (clone $entreguesQuery)
+            ->selectRaw('familia_id, COUNT(*) as total, MAX(data_entrega) as ultima_entrega')
+            ->groupBy('familia_id')
+            ->get()
+            ->keyBy('familia_id');
+
+         if ($porFamilia->isNotEmpty()) {
+            $familiasEntregues = Familia::with('representante')
+               ->whereIn('id', $porFamilia->keys())
+               ->get();
+
+            $mapaEntregas = $familiasEntregues->map(function ($f) use ($porFamilia, $alegreLat, $alegreLng) {
+               $info = $porFamilia->get($f->id);
+
+               return [
+                  'lat'       => $f->latitude  ? (float) $f->latitude  : $alegreLat,
+                  'lng'       => $f->longitude ? (float) $f->longitude : $alegreLng,
+                  'nome'      => optional($f->representante)->nome ?? 'Família #' . $f->id,
+                  'end'       => implode(', ', array_filter([$f->endereco, $f->numero_casa, $f->bairro, $f->cidade])),
+                  'bairro'    => $f->bairro,
+                  'qtd'       => (int) $info->total,
+                  'ultima'    => optional($info->ultima_entrega)->format('d/m/Y'),
+                  'aproximado' => ! ($f->latitude && $f->longitude),
+               ];
+            })->sortByDesc('qtd')->values();
+
+            $bairroConcentracao = $mapaEntregas
+               ->groupBy(fn($p) => $p['bairro'] ?: 'Não informado')
+               ->map(fn($grupo, $bairro) => ['bairro' => $bairro, 'total' => $grupo->sum('qtd')])
+               ->sortByDesc('total')
+               ->first();
+         }
       }
 
       return view('dashboard', compact(
@@ -181,7 +209,70 @@ class HomeController extends Controller
          'chartRequestData',
          'chartStatusLabels',
          'chartStatusTotals',
-         'mapaFamilias'
+         'mapaEntregas',
+         'bairroConcentracao'
       ));
+   }
+
+   /**
+    * Exporta a relação de cestas entregues (endereço e quantidade) em CSV.
+    *
+    * @return \Symfony\Component\HttpFoundation\StreamedResponse
+    */
+   public function exportarEntregas()
+   {
+      $user = Auth::user();
+      $parceiro = $user->parceiros->first();
+
+      abort_unless($user->can('Administrador') || $parceiro, 403);
+
+      $entreguesQuery = Cesta::query()
+         ->where('status', 'Entregue')
+         ->whereNotNull('familia_id');
+
+      if (! $user->can('Administrador')) {
+         $entreguesQuery->where('parceiro_id', $parceiro->id);
+      }
+
+      $porFamilia = (clone $entreguesQuery)
+         ->selectRaw('familia_id, COUNT(*) as total, MAX(data_entrega) as ultima_entrega')
+         ->groupBy('familia_id')
+         ->get()
+         ->keyBy('familia_id');
+
+      $familias = Familia::with('representante')
+         ->whereIn('id', $porFamilia->keys())
+         ->get()
+         ->sortByDesc(fn($f) => $porFamilia->get($f->id)->total);
+
+      $nomeArquivo = 'entregas-cestas-' . now()->format('Y-m-d') . '.csv';
+
+      $callback = function () use ($familias, $porFamilia) {
+         $saida = fopen('php://output', 'w');
+         fwrite($saida, "\xEF\xBB\xBF"); // BOM para acentuação correta no Excel
+
+         fputcsv($saida, ['Família', 'Endereço', 'Número', 'Bairro', 'Cidade', 'CEP', 'Quantidade de Cestas Entregues', 'Última Entrega'], ';');
+
+         foreach ($familias as $f) {
+            $info = $porFamilia->get($f->id);
+
+            fputcsv($saida, [
+               optional($f->representante)->nome ?? 'Família #' . $f->id,
+               $f->endereco,
+               $f->numero_casa,
+               $f->bairro,
+               $f->cidade,
+               $f->cep,
+               $info->total,
+               optional($info->ultima_entrega)->format('d/m/Y'),
+            ], ';');
+         }
+
+         fclose($saida);
+      };
+
+      return response()->streamDownload($callback, $nomeArquivo, [
+         'Content-Type' => 'text/csv; charset=UTF-8',
+      ]);
    }
 }
